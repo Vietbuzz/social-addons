@@ -6,6 +6,10 @@
     "depends": ["sale_management", "mail", "bus", "account_payment", "l10n_vn"],
     "data": [
         "security/livestream_security.xml",
+        "security/ir.access.csv",
+        "views/livestream_account_views.xml",
+        "views/livestream_session_views.xml",
+        "views/menus.xml",
     ],
     "license": "LGPL-3",
     "application": True,

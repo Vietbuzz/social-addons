@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="livestream_session_view_list" model="ir.ui.view">
+        <field name="name">livestream.session.list</field>
+        <field name="model">livestream.session</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date_start"/>
+                <field name="name"/>
+                <field name="account_id"/>
+                <field name="state" widget="badge" decoration-success="state == 'live'" decoration-muted="state == 'ended'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="livestream_session_view_form" model="ir.ui.view">
+        <field name="name">livestream.session.form</field>
+        <field name="model">livestream.session</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_start" type="object" string="Start" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_end" type="object" string="End" invisible="state != 'live'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <div class="oe_title"><h1><field name="name" placeholder="e.g. Live 22/11 - Autumn collection"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="account_id"/>
+                            <field name="user_ids" widget="many2many_avatar_user"/>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="external_video_id"/>
+                            <field name="external_post_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Product Tags" name="tags">
+                            <field name="tag_ids">
+                                <list editable="bottom">
+                                    <field name="code"/>
+                                    <field name="product_id"/>
+                                    <field name="price_unit"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="livestream_session_action" model="ir.actions.act_window">
+        <field name="name">Live Sessions</field>
+        <field name="res_model">livestream.session</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

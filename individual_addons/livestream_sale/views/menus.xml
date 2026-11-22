@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_livestream_root" name="Livestream" sequence="25"
+              web_icon="sale,static/description/icon.png"
+              groups="group_livestream_user"/>
+    <menuitem id="menu_livestream_sessions" name="Live Sessions" parent="menu_livestream_root"
+              action="livestream_session_action" sequence="20"/>
+    <menuitem id="menu_livestream_config" name="Configuration" parent="menu_livestream_root"
+              sequence="90" groups="group_livestream_manager"/>
+    <menuitem id="menu_livestream_accounts" name="Connected Accounts" parent="menu_livestream_config"
+              action="livestream_account_action" sequence="10"/>
+</odoo>

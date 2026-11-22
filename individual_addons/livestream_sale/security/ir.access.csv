@@ -1,0 +1,11 @@
+id,name,model_id,group_id/id,operation,domain
+access_livestream_account_user,livestream.account user,livestream.account,group_livestream_user,r,
+access_livestream_account_manager,livestream.account manager,livestream.account,group_livestream_manager,crud,
+access_livestream_session_user,livestream.session user,livestream.session,group_livestream_user,cru,
+access_livestream_session_manager,livestream.session manager,livestream.session,group_livestream_manager,crud,
+access_livestream_session_tag_user,livestream.session.tag user,livestream.session.tag,group_livestream_user,crud,
+access_livestream_customer_user,livestream.customer user,livestream.customer,group_livestream_user,cru,
+access_livestream_customer_manager,livestream.customer manager,livestream.customer,group_livestream_manager,crud,
+livestream_account_comp_rule,Livestream account multi-company,livestream.account,,crud,"[('company_id', 'in', company_ids)]"
+livestream_session_comp_rule,Livestream session multi-company,livestream.session,,crud,"[('company_id', 'in', company_ids)]"
+livestream_customer_comp_rule,Livestream customer multi-company,livestream.customer,,crud,"[('company_id', 'in', company_ids)]"
