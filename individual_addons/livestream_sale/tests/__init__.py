@@ -5,3 +5,4 @@ from . import test_conversation
 from . import test_sale_order
 from . import test_bank_matching
 from . import test_simulator
+from . import test_console

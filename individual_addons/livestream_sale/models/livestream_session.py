@@ -28,6 +28,15 @@ class LivestreamSession(models.Model):
     def action_end(self):
         self.write({"state": "ended", "date_end": fields.Datetime.now()})
 
+    def action_open_console(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.client",
+            "tag": "livestream_console",
+            "name": self.env._("Operator Console"),
+            "params": {"session_id": self.id},
+        }
+
 
 class LivestreamSessionTag(models.Model):
     _name = "livestream.session.tag"

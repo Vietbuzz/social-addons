@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="livestream_sale.Console">
+        <div class="o_livestream_console d-flex flex-column h-100 bg-view">
+            <div class="o_ls_topbar d-flex flex-wrap align-items-center gap-2 px-3 py-2 border-bottom">
+                <t t-if="this.state.session">
+                    <select class="form-select form-select-sm w-auto" t-on-change="(ev) => this.onChangeSession(ev)">
+                        <t t-foreach="this.state.sessions" t-as="s" t-key="s.id">
+                            <option t-att-value="s.id" t-att-selected="s.id === this.state.session.id" t-out="s.name"/>
+                        </t>
+                    </select>
+                    <span t-if="this.state.session.state === 'live'" class="badge text-bg-danger"><i class="fa fa-circle me-1"/>LIVE</span>
+                    <span t-else="" class="badge text-bg-secondary" t-out="this.state.session.state"/>
+                    <button class="btn btn-sm btn-link" t-on-click="() => this.openSession()" title="Session settings"><i class="fa fa-cog"/></button>
+                </t>
+                <div class="ms-auto d-flex gap-2 d-lg-none">
+                    <t t-foreach="[['comments', 'Comments'], ['chat', 'Chat'], ['order', 'Order']]" t-as="tab" t-key="tab[0]">
+                        <button class="btn btn-sm" t-att-class="this.state.mobileTab === tab[0] ? 'btn-primary' : 'btn-secondary'"
+                                t-on-click="() => (this.state.mobileTab = tab[0])" t-out="tab[1]"/>
+                    </t>
+                </div>
+            </div>
+            <div t-if="!this.state.session" class="p-5 text-center text-muted">
+                <p>No live session yet. Create one under Livestream › Live Sessions.</p>
+            </div>
+            <div t-else="" class="o_ls_columns flex-grow-1" t-att-data-tab="this.state.mobileTab">
+                <section class="o_ls_col o_ls_col_comments border-end">
+                    <CommentFeed model="this.model"/>
+                </section>
+                <section class="o_ls_col o_ls_col_chat border-end">
+                    <ConversationPanel model="this.model"/>
+                </section>
+                <section class="o_ls_col o_ls_col_order">
+                    <OrderPanel model="this.model"/>
+                    <BankFeed model="this.model"/>
+                </section>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="livestream_sale.CommentFeed">
+        <div class="d-flex flex-column h-100">
+            <div class="p-2 border-bottom">
+                <div class="d-flex flex-wrap gap-1 mb-2">
+                    <button class="btn btn-sm" t-att-class="!this.state.tagFilter ? 'btn-primary' : 'btn-light'"
+                            t-on-click="() => (this.state.tagFilter = false)">All <span class="badge text-bg-light" t-out="this.state.comments.length"/></button>
+                    <t t-foreach="this.state.session.tags" t-as="tag" t-key="tag.code">
+                        <button class="btn btn-sm o_ls_tag" t-att-class="this.state.tagFilter === tag.code ? 'btn-primary' : 'btn-light'"
+                                t-att-title="tag.product_name" t-on-click="() => this.setFilter(tag.code)">
+                            <t t-out="tag.code"/> <span class="badge text-bg-light" t-out="this.model.tagCount(tag.code)"/>
+                        </button>
+                    </t>
+                    <button class="btn btn-sm" t-att-class="this.state.tagFilter === '__none__' ? 'btn-primary' : 'btn-light'"
+                            t-on-click="() => this.setFilter('__none__')">No tag</button>
+                </div>
+                <div class="d-flex gap-2">
+                    <input type="search" class="form-control form-control-sm" placeholder="Search customer or text…"
+                           t-att-value="this.state.search" t-on-input="(ev) => this.onSearch(ev)"/>
+                    <button t-if="this.state.canSimulate" class="btn btn-sm btn-outline-secondary text-nowrap o_ls_sim_comment"
+                            t-on-click="() => this.model.simulateComment()" title="Simulate a comment">
+                        <i class="fa fa-flask"/> Comment
+                    </button>
+                </div>
+            </div>
+            <div class="o_ls_scroll flex-grow-1" t-on-scroll="(ev) => this.onScroll(ev)">
+                <div t-if="!this.model.filteredComments.length" class="p-4 text-center text-muted">No comments.</div>
+                <t t-foreach="this.model.filteredComments" t-as="c" t-key="c.id">
+                    <div class="o_ls_comment d-flex gap-2 p-2 border-bottom"
+                         t-att-class="{ 'o_ls_active': c.id === this.state.activeCommentId, 'o_ls_flash': this.state.highlight['c' + c.id] }">
+                        <img t-if="c.avatar_url" t-att-src="c.avatar_url" class="o_ls_avatar rounded-circle" alt=""/>
+                        <div t-else="" class="o_ls_avatar rounded-circle bg-200 d-flex align-items-center justify-content-center fw-bold" t-out="c.customer_name[0]"/>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="d-flex align-items-center gap-1">
+                                <strong class="text-truncate" t-out="c.customer_name"/>
+                                <span t-if="c.tag_code" class="badge text-bg-info"><t t-out="c.tag_code"/><t t-if="c.quantity > 1"> ×<t t-out="c.quantity"/></t></span>
+                                <span class="ms-auto small text-muted" t-out="this.time(c.comment_time)"/>
+                            </div>
+                            <div class="small text-break" t-out="c.message"/>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <span class="badge" t-att-class="this.stateBadge(c.state)" t-out="c.state"/>
+                                <span t-if="c.product_name" class="small text-muted text-truncate" t-out="c.product_name"/>
+                                <button class="btn btn-sm btn-primary ms-auto o_ls_open" t-on-click="() => this.model.openComment(c.id)">
+                                    Open &amp; close sale
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="livestream_sale.ConversationPanel">
+        <div class="d-flex flex-column h-100">
+            <t t-if="this.originComment">
+                <div class="p-2 border-bottom bg-100">
+                    <div class="d-flex align-items-center gap-2">
+                        <strong t-out="this.originComment.customer_name"/>
+                        <span class="badge" t-att-class="this.windowClass" t-out="this.windowLabel"/>
+                        <button t-if="this.state.canSimulate" class="btn btn-sm btn-outline-secondary ms-auto"
+                                t-on-click="() => this.simulateReply()" title="Simulate customer reply"><i class="fa fa-flask"/> Reply</button>
+                    </div>
+                    <div class="o_ls_origin mt-1 p-2 rounded border bg-view small">
+                        <i class="fa fa-comment-o me-1"/> Comment: <em t-out="this.originComment.message"/>
+                    </div>
+                </div>
+                <div class="o_ls_thread flex-grow-1 d-flex flex-column min-h-0">
+                    <t t-if="this.state.thread">
+                        <div class="flex-grow-1 overflow-auto min-h-0">
+                            <Thread thread="this.state.thread" t-key="this.state.thread.localId"/>
+                        </div>
+                        <div class="border-top">
+                            <Composer composer="this.state.thread.composer" t-key="this.state.thread.localId" mode="'extended'"/>
+                        </div>
+                    </t>
+                </div>
+                <div class="p-2 border-top d-flex gap-2">
+                    <button class="btn btn-success o_ls_send_deposit" t-att-disabled="!this.state.panel.order or this.state.busy"
+                            t-on-click="() => this.model.sendDepositRequest()">
+                        <i class="fa fa-qrcode me-1"/> Send deposit request &amp; QR
+                    </button>
+                </div>
+            </t>
+            <div t-else="" class="flex-grow-1 d-flex align-items-center justify-content-center text-muted p-4 text-center">
+                Pick a comment and click “Open &amp; close sale” to chat with the customer.
+            </div>
+        </div>
+    </t>
+
+    <t t-name="livestream_sale.OrderPanel">
+        <div class="o_ls_order p-2 border-bottom">
+            <h6 class="mb-2">Customer order</h6>
+            <div t-if="!this.state.panel" class="text-muted small">No customer selected.</div>
+            <t t-elif="!this.order">
+                <table class="table table-sm align-middle mb-2">
+                    <tbody>
+                        <t t-foreach="this.state.form.lines" t-as="line" t-key="line_index">
+                            <tr>
+                                <td class="small" t-out="line.product_name"/>
+                                <td style="width: 70px"><input type="number" min="1" class="form-control form-control-sm"
+                                       t-att-value="line.quantity" t-on-change="(ev) => this.setLine(line, 'quantity', ev)"/></td>
+                                <td style="width: 110px"><input type="number" min="0" step="1000" class="form-control form-control-sm"
+                                       t-att-value="line.price_unit" t-on-change="(ev) => this.setLine(line, 'price_unit', ev)"/></td>
+                                <td style="width: 30px"><button class="btn btn-sm btn-link text-danger" t-on-click="() => this.model.removeLine(line_index)"><i class="fa fa-times"/></button></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+                <select class="form-select form-select-sm mb-2" t-on-change="(ev) => this.onAddTag(ev)">
+                    <option value="">+ Add product by tag…</option>
+                    <t t-foreach="this.state.session.tags" t-as="tag" t-key="tag.code">
+                        <option t-att-value="tag.code"><t t-out="tag.code"/> — <t t-out="tag.product_name"/></option>
+                    </t>
+                </select>
+                <div class="row g-2 mb-2">
+                    <div class="col-6"><input class="form-control form-control-sm" placeholder="Phone" t-att-value="this.state.form.phone" t-on-input="(ev) => this.setField('phone', ev)"/></div>
+                    <div class="col-6"><input class="form-control form-control-sm" placeholder="Name" t-att-value="this.state.form.name" t-on-input="(ev) => this.setField('name', ev)"/></div>
+                    <div class="col-12"><input class="form-control form-control-sm" placeholder="Delivery address" t-att-value="this.state.form.street" t-on-input="(ev) => this.setField('street', ev)"/></div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small text-muted">Total <strong t-out="this.formatVnd(this.model.formTotal)"/></span>
+                    <label class="small ms-auto">Deposit</label>
+                    <input type="number" min="0" step="10000" class="form-control form-control-sm w-auto" style="max-width: 120px"
+                           t-att-value="this.state.form.deposit" t-on-input="(ev) => this.setField('deposit', ev)"/>
+                    <button class="btn btn-sm btn-primary o_ls_create_order" t-att-disabled="this.state.busy or !this.state.form.lines.length"
+                            t-on-click="() => this.model.createOrder()">Create order</button>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <a href="#" t-on-click.prevent="() => this.env.services.action.doAction({type: 'ir.actions.act_window', res_model: 'sale.order', res_id: this.order.id, views: [[false, 'form']]})">
+                        <strong t-out="this.order.name"/>
+                    </a>
+                    <span class="badge" t-att-class="this.order.state === 'sale' ? 'text-bg-success' : 'text-bg-warning'" t-out="this.order.state === 'sale' ? 'Confirmed' : 'Waiting deposit'"/>
+                    <span class="ms-auto" t-out="this.formatVnd(this.order.amount_total)"/>
+                </div>
+                <div class="small mb-2">
+                    Deposit <strong t-out="this.formatVnd(this.order.prepayment_amount)"/> ·
+                    paid <strong class="text-success" t-out="this.formatVnd(this.order.amount_paid)"/> ·
+                    due <strong t-att-class="this.order.deposit_due > 0 ? 'text-danger' : 'text-success'" t-out="this.formatVnd(this.order.deposit_due)"/>
+                </div>
+                <div t-if="this.order.qr_url" class="d-flex gap-2 align-items-start">
+                    <img t-att-src="this.order.qr_url" class="o_ls_qr border rounded" alt="VietQR"/>
+                    <div class="d-flex flex-column gap-1">
+                        <code class="fs-5" t-out="this.order.payment_ref"/>
+                        <button class="btn btn-sm btn-secondary" t-on-click="() => this.model.copyTransferContent()"><i class="fa fa-copy me-1"/>Copy transfer content</button>
+                        <button class="btn btn-sm btn-success" t-att-disabled="this.state.busy" t-on-click="() => this.model.sendDepositRequest()"><i class="fa fa-paper-plane me-1"/>Send to chat</button>
+                    </div>
+                </div>
+                <div t-elif="this.order.qr_error" class="alert alert-warning small p-2" t-out="this.order.qr_error"/>
+                <div t-elif="this.order.deposit_due &lt;= 0" class="alert alert-success small p-2 mb-0"><i class="fa fa-check me-1"/>Deposit fully received.</div>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="livestream_sale.BankFeed">
+        <div class="o_ls_bank d-flex flex-column flex-grow-1 min-h-0">
+            <div class="d-flex align-items-center p-2 border-bottom">
+                <h6 class="mb-0">Incoming transfers</h6>
+                <button t-if="this.state.canSimulate" class="btn btn-sm btn-outline-secondary ms-auto o_ls_sim_bank"
+                        t-on-click="() => this.simulate()"><i class="fa fa-flask"/> Transfer</button>
+            </div>
+            <div class="o_ls_scroll flex-grow-1">
+                <div t-if="!this.state.bankTransactions.length" class="p-3 text-center text-muted small">No transfers yet.</div>
+                <t t-foreach="this.state.bankTransactions" t-as="tx" t-key="tx.id">
+                    <div class="o_ls_tx p-2 border-bottom"
+                         t-att-class="{ 'o_ls_tx_matched': tx.state === 'matched', 'o_ls_tx_unmatched': tx.state === 'unmatched', 'text-muted': tx.state === 'ignored', 'o_ls_flash': this.state.highlight['t' + tx.id] }">
+                        <div class="d-flex align-items-center gap-2">
+                            <strong t-out="this.formatVnd(tx.amount)"/>
+                            <span class="small text-muted" t-out="tx.gateway"/>
+                            <span class="small text-muted ms-auto" t-out="this.time(tx.date)"/>
+                        </div>
+                        <div class="small text-break" t-out="tx.content"/>
+                        <div t-if="tx.state === 'matched'" class="small text-success">
+                            <i class="fa fa-check-circle me-1"/><t t-out="tx.sale_order_name"/> · <t t-out="tx.partner_name"/>
+                            <span class="text-muted" t-if="tx.match_method === 'manual'"> (manual)</span>
+                        </div>
+                        <div t-elif="tx.state === 'unmatched'" class="d-flex flex-wrap gap-1 mt-1">
+                            <button t-if="this.openOrder and this.openOrder.deposit_due > 0" class="btn btn-sm btn-primary o_ls_attach_open"
+                                    t-att-disabled="this.state.busy" t-on-click="() => this.model.matchTransaction(tx.id, this.openOrder.id)">
+                                Attach to <t t-out="this.openOrder.name"/>
+                            </button>
+                            <t t-foreach="tx.suggestions.slice(0, 3)" t-as="sug" t-key="sug.order_id">
+                                <button t-if="!this.openOrder or sug.order_id !== this.openOrder.id" class="btn btn-sm btn-outline-primary"
+                                        t-att-disabled="this.state.busy" t-att-title="sug.partner_name + ' — due ' + this.formatVnd(sug.deposit_due)"
+                                        t-on-click="() => this.model.matchTransaction(tx.id, sug.order_id)">
+                                    <t t-out="sug.name"/> (<t t-out="sug.score"/>)
+                                </button>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

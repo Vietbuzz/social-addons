@@ -1,0 +1,66 @@
+.o_livestream_console {
+    .o_ls_columns {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) minmax(360px, 1.4fr) minmax(320px, 1.1fr);
+        min-height: 0;
+    }
+    .o_ls_col {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        min-width: 0;
+    }
+    .o_ls_scroll {
+        overflow-y: auto;
+        min-height: 0;
+    }
+    .o_ls_avatar {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        object-fit: cover;
+    }
+    .o_ls_comment.o_ls_active {
+        background-color: rgba($o-action, 0.08);
+        border-left: 3px solid $o-action;
+    }
+    .o_ls_flash {
+        animation: o_ls_flash 2.5s ease-out;
+    }
+    .o_ls_tx_matched {
+        border-left: 4px solid $success;
+        background-color: rgba($success, 0.06);
+    }
+    .o_ls_tx_unmatched {
+        border-left: 4px solid $warning;
+        background-color: rgba($warning, 0.08);
+    }
+    .o_ls_qr {
+        width: 150px;
+        height: 150px;
+    }
+    .o_ls_order {
+        flex: 0 0 auto;
+        max-height: 60%;
+        overflow-y: auto;
+    }
+    @media (max-width: 991.98px) {
+        .o_ls_columns {
+            grid-template-columns: 1fr;
+        }
+        .o_ls_columns[data-tab="comments"] .o_ls_col:not(.o_ls_col_comments),
+        .o_ls_columns[data-tab="chat"] .o_ls_col:not(.o_ls_col_chat),
+        .o_ls_columns[data-tab="order"] .o_ls_col:not(.o_ls_col_order) {
+            display: none;
+        }
+    }
+}
+
+@keyframes o_ls_flash {
+    from {
+        background-color: rgba($warning, 0.45);
+    }
+    to {
+        background-color: transparent;
+    }
+}

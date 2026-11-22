@@ -3,6 +3,8 @@
     <menuitem id="menu_livestream_root" name="Livestream" sequence="25"
               web_icon="sale,static/description/icon.png"
               groups="group_livestream_user"/>
+    <menuitem id="menu_livestream_console" name="Operator Console" parent="menu_livestream_root"
+              action="action_livestream_console" sequence="10"/>
     <menuitem id="menu_livestream_sessions" name="Live Sessions" parent="menu_livestream_root"
               action="livestream_session_action" sequence="20"/>
     <menuitem id="menu_livestream_comments" name="Comments" parent="menu_livestream_root"

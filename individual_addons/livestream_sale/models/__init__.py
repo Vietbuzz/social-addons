@@ -9,3 +9,4 @@ from . import res_partner
 from . import sale_order
 from . import livestream_bank_transaction
 from . import livestream_simulator
+from . import livestream_console

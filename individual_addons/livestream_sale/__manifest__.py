@@ -15,8 +15,14 @@
         "views/sale_order_views.xml",
         "wizard/livestream_unmatch_wizard_views.xml",
         "views/livestream_bank_transaction_views.xml",
+        "data/client_action.xml",
         "views/menus.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "livestream_sale/static/src/**/*",
+        ],
+    },
     "license": "LGPL-3",
     "application": True,
 }
