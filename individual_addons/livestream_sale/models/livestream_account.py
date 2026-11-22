@@ -1,4 +1,9 @@
+import logging
+
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class LivestreamAccount(models.Model):
@@ -30,3 +35,19 @@ class LivestreamAccount(models.Model):
             "company_id": self.company_id.id,
             "items": payload,
         })
+
+    # Platform hooks: connector modules override these for their platform.
+    def _livestream_private_reply(self, comment, body, attachments):
+        """Send the one-off private reply to a comment; return the inbox id if known."""
+        self.ensure_one()
+        if self.platform == "simulator":
+            _logger.info("Simulator private reply to %s: %s", comment.external_id, body)
+            return f"sim-{comment.customer_id.external_user_id}"
+        raise UserError(self.env._("Private replies are not supported for %s.", self.platform))
+
+    def _livestream_send_message(self, customer, body, attachments):
+        self.ensure_one()
+        if self.platform == "simulator":
+            _logger.info("Simulator message to %s: %s", customer.name, body)
+            return
+        raise UserError(self.env._("Messaging is not supported for %s.", self.platform))

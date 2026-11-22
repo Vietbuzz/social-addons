@@ -76,3 +76,13 @@ class LivestreamComment(models.Model):
             "channel_id": self.channel_id.id or False,
             "sale_order_id": self.sale_order_id.id or False,
         }
+
+    def action_open_conversation(self):
+        self.ensure_one()
+        channel = self.customer_id._get_or_create_channel()
+        channel.sudo().livestream_origin_comment_id = self
+        if not self.channel_id:
+            self.channel_id = channel
+        if self.state == "new":
+            self.state = "contacted"
+        return {"channel_id": channel.id, "comment": self._console_format()}
