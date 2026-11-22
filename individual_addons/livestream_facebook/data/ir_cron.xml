@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_fb_pull_comments" model="ir.cron">
+        <field name="name">Livestream: Pull Facebook live comments</field>
+        <field name="model_id" ref="livestream_sale.model_livestream_session"/>
+        <field name="state">code</field>
+        <field name="code">model._fb_cron_pull_comments()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+    </record>
+</odoo>

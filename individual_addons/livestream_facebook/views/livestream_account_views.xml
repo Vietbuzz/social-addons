@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="livestream_account_view_form_facebook" model="ir.ui.view">
+        <field name="name">livestream.account.form.facebook</field>
+        <field name="model">livestream.account</field>
+        <field name="inherit_id" ref="livestream_sale.livestream_account_view_form"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button name="action_fb_subscribe" type="object" string="Subscribe Page webhooks" invisible="platform != 'facebook'"/>
+                <button name="action_fb_sync_live_videos" type="object" string="Sync live videos" invisible="platform != 'facebook'"/>
+            </header>
+            <group name="main" position="after">
+                <group string="Meta App" invisible="platform != 'facebook'">
+                    <group>
+                        <field name="fb_app_id"/>
+                        <field name="fb_app_secret" password="True"/>
+                    </group>
+                    <group>
+                        <field name="fb_webhook_url" widget="CopyClipboardChar"/>
+                        <field name="fb_verify_token" widget="CopyClipboardChar"/>
+                    </group>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>
