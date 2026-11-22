@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="payment_method_sepay" model="payment.method">
+        <field name="name">Bank transfer (SePay)</field>
+        <field name="code">sepay</field>
+        <field name="provider_id" ref="payment_provider_sepay"/>
+        <field name="image" type="bytes" file="payment/static/img/unknown.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_manual_capture">none</field>
+        <field name="support_refund">none</field>
+    </record>
+</odoo>

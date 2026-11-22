@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="payment_provider_sepay" model="payment.provider">
+        <field name="name">SePay</field>
+        <field name="code">sepay</field>
+        <field name="is_published">False</field>
+        <field name="active">False</field>
+    </record>
+</odoo>

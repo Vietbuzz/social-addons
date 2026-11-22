@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_provider_form_sepay" model="ir.ui.view">
+        <field name="name">payment.provider.form.sepay</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position="inside">
+                <group invisible="code != 'sepay'" colspan="2">
+                    <field name="sepay_webhook_api_key" password="True" required="code == 'sepay' and active"/>
+                    <field name="sepay_api_token" password="True"/>
+                    <field name="sepay_account_number"/>
+                    <field name="sepay_webhook_url" widget="CopyClipboardChar"/>
+                    <field name="sepay_last_pulled_id"/>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>

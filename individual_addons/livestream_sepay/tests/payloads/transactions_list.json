@@ -1,0 +1,49 @@
+{
+    "status": 200,
+    "error": null,
+    "messages": {"success": true},
+    "transactions": [
+        {
+            "id": "92705",
+            "bank_brand_name": "Vietcombank",
+            "account_number": "0011223344",
+            "transaction_date": "2026-11-22 14:05:00",
+            "amount_out": "0.00",
+            "amount_in": "50000.00",
+            "accumulated": "105050000.00",
+            "transaction_content": "ck coc ao do",
+            "reference_number": "677760.221126.080001",
+            "code": null,
+            "sub_account": null,
+            "bank_account_id": "19"
+        },
+        {
+            "id": "92704",
+            "bank_brand_name": "Vietcombank",
+            "account_number": "0011223344",
+            "transaction_date": "2026-11-22 14:02:37",
+            "amount_out": "0.00",
+            "amount_in": "100000.00",
+            "accumulated": "105000000.00",
+            "transaction_content": "LS000000 chuyen tien",
+            "reference_number": "FT24012345678",
+            "code": null,
+            "sub_account": null,
+            "bank_account_id": "19"
+        },
+        {
+            "id": "92703",
+            "bank_brand_name": "Vietcombank",
+            "account_number": "0011223344",
+            "transaction_date": "2026-11-22 13:00:00",
+            "amount_out": "20000.00",
+            "amount_in": "0.00",
+            "accumulated": "104900000.00",
+            "transaction_content": "phi sms",
+            "reference_number": "X1",
+            "code": null,
+            "sub_account": null,
+            "bank_account_id": "19"
+        }
+    ]
+}
