@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_order_view_form_livestream" model="ir.ui.view">
+        <field name="name">sale.order.form.livestream</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <page name="other_information" position="before">
+                <page string="Livestream" name="livestream" invisible="not is_livestream">
+                    <group>
+                        <group>
+                            <field name="is_livestream" invisible="1"/>
+                            <field name="livestream_session_id" readonly="1"/>
+                            <field name="livestream_channel_id" readonly="1"/>
+                            <field name="livestream_payment_ref"/>
+                        </group>
+                        <group>
+                            <field name="prepayment_amount"/>
+                            <field name="amount_paid"/>
+                            <field name="livestream_deposit_due"/>
+                        </group>
+                    </group>
+                    <field name="livestream_comment_ids" readonly="1">
+                        <list>
+                            <field name="comment_time"/>
+                            <field name="customer_id"/>
+                            <field name="message"/>
+                            <field name="tag_code"/>
+                        </list>
+                    </field>
+                </page>
+            </page>
+        </field>
+    </record>
+
+    <record id="sale_order_view_search_livestream" model="ir.ui.view">
+        <field name="name">sale.order.search.livestream</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <filter name="my_sale_orders_filter" position="after">
+                <filter name="livestream" string="Livestream" domain="[('is_livestream', '=', True)]"/>
+            </filter>
+            <field name="name" position="after">
+                <field name="livestream_payment_ref"/>
+            </field>
+        </field>
+    </record>
+</odoo>

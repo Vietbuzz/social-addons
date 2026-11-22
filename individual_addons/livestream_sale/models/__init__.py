@@ -5,3 +5,5 @@ from . import livestream_comment
 from . import livestream_webhook_event
 from . import discuss_channel
 from . import mail_message
+from . import res_partner
+from . import sale_order

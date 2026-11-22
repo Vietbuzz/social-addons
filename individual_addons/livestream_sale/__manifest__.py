@@ -12,6 +12,8 @@
         "views/livestream_comment_views.xml",
         "views/menus.xml",
         "data/ir_cron.xml",
+        "data/ir_sequence.xml",
+        "views/sale_order_views.xml",
     ],
     "license": "LGPL-3",
     "application": True,

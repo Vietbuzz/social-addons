@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 from .tag_parser import parse_tag
 
@@ -86,3 +87,38 @@ class LivestreamComment(models.Model):
         if self.state == "new":
             self.state = "contacted"
         return {"channel_id": channel.id, "comment": self._console_format()}
+
+    def action_create_order(self, lines, phone, name, street, deposit_amount):
+        """Create the quotation for this comment's customer (console "Create order")."""
+        self.ensure_one()
+        if not lines:
+            raise UserError(self.env._("Add at least one product."))
+        customer = self.customer_id
+        partner = self.env["res.partner"]._livestream_find_or_create(name or customer.name, phone, street)
+        if customer.partner_id != partner:
+            old_partner = customer.partner_id
+            customer.partner_id = partner
+            channel = customer.channel_id.sudo()
+            if channel:
+                channel._add_members(partners=partner, post_joined_message=False)
+                if old_partner and old_partner != partner:
+                    channel.channel_member_ids.filtered(lambda m: m.partner_id == old_partner).sudo().unlink()
+        order = self.env["sale.order"].create({
+            "partner_id": partner.id,
+            "livestream_session_id": self.session_id.id,
+            "livestream_channel_id": (self.channel_id or customer.channel_id).id,
+            "livestream_payment_ref": self.env["ir.sequence"].sudo().next_by_code("livestream.payment.ref"),
+            "require_signature": False,
+            "company_id": self.company_id.id,
+            "order_line": [
+                fields.Command.create({
+                    "product_id": line["product_id"],
+                    "product_uom_qty": line.get("quantity", 1),
+                    "price_unit": line["price_unit"],
+                }) for line in lines
+            ],
+        })
+        # prepayment_amount inverts into prepayment_percent: set it once lines exist
+        order.prepayment_amount = deposit_amount or 0.0
+        self.write({"state": "ordered", "sale_order_id": order.id})
+        return order.id
