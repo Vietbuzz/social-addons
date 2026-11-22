@@ -1,0 +1,141 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* livestream_sepay
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 20.0-20261112\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-22 23:52+0000\n"
+"PO-Revision-Date: 2026-11-22 23:52+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_payment_provider__sepay_api_token
+msgid "API Token"
+msgstr "API Token"
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_payment_provider__sepay_account_number
+msgid "Bank Account Number"
+msgstr "Số tài khoản ngân hàng"
+
+#. module: livestream_sepay
+#: model:payment.method,name:livestream_sepay.payment_method_sepay
+msgid "Bank transfer (SePay)"
+msgstr "Chuyển khoản (SePay)"
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_payment_provider__code
+msgid "Code"
+msgstr "Mã"
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_livestream_webhook_event__display_name
+#: model:ir.model.fields,field_description:livestream_sepay.field_payment_provider__display_name
+msgid "Display Name"
+msgstr "Tên hiển thị"
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_livestream_webhook_event__id
+#: model:ir.model.fields,field_description:livestream_sepay.field_payment_provider__id
+msgid "ID"
+msgstr ""
+
+#. module: livestream_sepay
+#: model:ir.model.fields,help:livestream_sepay.field_payment_provider__sepay_webhook_api_key
+msgid "Key SePay sends as 'Authorization: Apikey <key>' on each webhook."
+msgstr "Khóa SePay gửi kèm mỗi webhook dưới dạng 'Authorization: Apikey <key>'."
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_payment_provider__sepay_last_pulled_id
+msgid "Last Pulled SePay ID"
+msgstr "ID SePay đã kéo gần nhất"
+
+#. module: livestream_sepay
+#: model:ir.model.fields,help:livestream_sepay.field_payment_provider__sepay_account_number
+msgid "Limit pulled transactions to this account."
+msgstr "Chỉ kéo giao dịch của tài khoản này."
+
+#. module: livestream_sepay
+#: model:ir.module.module,shortdesc:base.module_livestream_sepay
+msgid "Livestream Sale - SePay"
+msgstr ""
+
+#. module: livestream_sepay
+#: model:ir.model,name:livestream_sepay.model_livestream_webhook_event
+msgid "Livestream Webhook Event"
+msgstr ""
+
+#. module: livestream_sepay
+#: model:ir.actions.server,name:livestream_sepay.ir_cron_sepay_pull_ir_actions_server
+msgid "Livestream: Pull SePay transactions"
+msgstr "Livestream: Kéo giao dịch SePay"
+
+#. module: livestream_sepay
+#: model:ir.model,name:livestream_sepay.model_payment_provider
+msgid "Payment Provider"
+msgstr "Nhà cung cấp dịch vụ thanh toán"
+
+#. module: livestream_sepay
+#: model:ir.module.module,summary:base.module_livestream_sepay
+msgid "Receive bank transfers from SePay and match them to livestream orders"
+msgstr ""
+
+#. module: livestream_sepay
+#: model:ir.model.fields.selection,name:livestream_sepay.selection__livestream_webhook_event__source__sepay
+#: model:ir.model.fields.selection,name:livestream_sepay.selection__payment_provider__code__sepay
+#: model:payment.provider,name:livestream_sepay.payment_provider_sepay
+msgid "SePay"
+msgstr ""
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_payment_provider__sepay_webhook_url
+msgid "Sepay Webhook Url"
+msgstr ""
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_livestream_webhook_event__source
+msgid "Source"
+msgstr ""
+
+#. module: livestream_sepay
+#: model:ir.model.fields,help:livestream_sepay.field_payment_provider__code
+msgid "The technical code of this payment provider."
+msgstr "Mã kỹ thuật của nhà cung cấp dịch vụ thanh toán này."
+
+#. module: livestream_sepay
+#. odoo-python
+#: code:addons/livestream_sepay/models/livestream_webhook_event.py:0
+msgid "Unknown SePay provider %s"
+msgstr "Không tìm thấy nhà cung cấp SePay %s"
+
+#. module: livestream_sepay
+#: model:ir.model.fields,field_description:livestream_sepay.field_payment_provider__sepay_webhook_api_key
+msgid "Webhook API Key"
+msgstr "Webhook API Key"
+
+#. module: livestream_sepay
+#: model_terms:payment.provider,auth_msg:livestream_sepay.payment_provider_sepay
+msgid "Your payment has been authorized."
+msgstr ""
+
+#. module: livestream_sepay
+#: model_terms:payment.provider,cancel_msg:livestream_sepay.payment_provider_sepay
+msgid "Your payment has been cancelled."
+msgstr ""
+
+#. module: livestream_sepay
+#: model_terms:payment.provider,pending_msg:livestream_sepay.payment_provider_sepay
+msgid "Your payment has been processed but is waiting for approval."
+msgstr ""
+
+#. module: livestream_sepay
+#: model_terms:payment.provider,done_msg:livestream_sepay.payment_provider_sepay
+msgid "Your payment has been processed."
+msgstr ""
