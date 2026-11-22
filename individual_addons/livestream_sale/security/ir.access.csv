@@ -9,3 +9,7 @@ access_livestream_customer_manager,livestream.customer manager,livestream.custom
 livestream_account_comp_rule,Livestream account multi-company,livestream.account,,crud,"[('company_id', 'in', company_ids)]"
 livestream_session_comp_rule,Livestream session multi-company,livestream.session,,crud,"[('company_id', 'in', company_ids)]"
 livestream_customer_comp_rule,Livestream customer multi-company,livestream.customer,,crud,"[('company_id', 'in', company_ids)]"
+access_livestream_comment_user,livestream.comment user,livestream.comment,group_livestream_user,cru,
+access_livestream_comment_manager,livestream.comment manager,livestream.comment,group_livestream_manager,crud,
+access_livestream_webhook_event_manager,livestream.webhook.event manager,livestream.webhook.event,group_livestream_manager,crud,
+livestream_comment_comp_rule,Livestream comment multi-company,livestream.comment,,crud,"[('company_id', 'in', company_ids)]"

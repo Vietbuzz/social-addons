@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="livestream_comment_view_list" model="ir.ui.view">
+        <field name="name">livestream.comment.list</field>
+        <field name="model">livestream.comment</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="comment_time"/>
+                <field name="session_id"/>
+                <field name="customer_id"/>
+                <field name="message"/>
+                <field name="tag_code"/>
+                <field name="quantity"/>
+                <field name="state" widget="badge"/>
+                <field name="sale_order_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="livestream_comment_view_search" model="ir.ui.view">
+        <field name="name">livestream.comment.search</field>
+        <field name="model">livestream.comment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="message"/>
+                <field name="customer_id"/>
+                <field name="tag_code"/>
+                <field name="session_id"/>
+                <filter name="new" string="New" domain="[('state', '=', 'new')]"/>
+                <group>
+                    <filter name="group_tag" string="Tag" context="{'group_by': 'tag_code'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="livestream_comment_action" model="ir.actions.act_window">
+        <field name="name">Comments</field>
+        <field name="res_model">livestream.comment</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="livestream_webhook_event_view_list" model="ir.ui.view">
+        <field name="name">livestream.webhook.event.list</field>
+        <field name="model">livestream.webhook.event</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="state == 'error'">
+                <field name="create_date"/>
+                <field name="source"/>
+                <field name="account_id"/>
+                <field name="state"/>
+                <field name="error"/>
+            </list>
+        </field>
+    </record>
+    <record id="livestream_webhook_event_action" model="ir.actions.act_window">
+        <field name="name">Inbound Events</field>
+        <field name="res_model">livestream.webhook.event</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

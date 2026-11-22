@@ -21,3 +21,12 @@ class LivestreamAccount(models.Model):
     _platform_external_uniq = models.Constraint(
         "UNIQUE(platform, external_id)", "This account is already connected.",
     )
+
+    def _notify_console(self, notification_type, payload):
+        """Push items to every open operator console (clients filter on account_id)."""
+        self.ensure_one()
+        self.env.ref("livestream_sale.group_livestream_user")._bus_send(notification_type, {
+            "account_id": self.id,
+            "company_id": self.company_id.id,
+            "items": payload,
+        })
