@@ -51,3 +51,19 @@ class LivestreamAccount(models.Model):
             _logger.info("Simulator message to %s: %s", customer.name, body)
             return
         raise UserError(self.env._("Messaging is not supported for %s.", self.platform))
+
+    def action_setup_provider_journal(self):
+        """Post deposits straight to the bank account (Community has no bank
+        statement reconciliation widget, so no outstanding receipts step)."""
+        if not self.env.user.has_group("livestream_sale.group_livestream_manager"):
+            raise UserError(self.env._("Only a livestream manager can configure deposits."))
+        for account in self:
+            provider = account.payment_provider_id.sudo()
+            journal = provider.journal_id
+            if not journal or journal.type != "bank":
+                raise UserError(self.env._("Set a bank journal on the deposit provider first."))
+            lines = journal.inbound_payment_method_line_ids.filtered(lambda l: l.payment_provider_id == provider)
+            if not lines:
+                raise UserError(self.env._("The bank journal has no payment method line for %s.", provider.name))
+            lines.payment_account_id = journal.default_account_id
+        return True

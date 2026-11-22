@@ -281,7 +281,7 @@ def test_payment_created_in_bank_journal(self): ...  # tx.payment_id.journal_id 
 **Interfaces:**
 - `livestream.simulator.simulate_comment(session_id: int, message: str | None = None, author_name: str | None = None) -> int`: tạo event `simulator` kind `comment` (tên khách ngẫu nhiên trong danh sách tên Việt mẫu, message mặc định là tag ngẫu nhiên của phiên + `x1..3`) rồi xử lý ngay. Trả về comment id.
 - `livestream.simulator.simulate_customer_reply(channel_id: int, text: str) -> None` → `customer._receive_message` (gán `psid = "sim-..."` nếu chưa có).
-- `livestream.simulator.simulate_bank(account_id: int, amount: float, content: str) -> int` → `livestream.bank.transaction._register(provider, {...external_id: "SIM-<uuid>"...})`.
+- `livestream.simulator.simulate_bank(account_id: int, amount: float, content: str) -> int` → `livestream.bank.transaction._register_transfer(provider, {...external_id: "SIM-<uuid>"...})`.
 - Mọi hàm trên chỉ manager gọi được, hoặc khi `ir.config_parameter` `livestream_sale.simulator_enabled` = `True`; không thỏa thì `AccessError`.
 
 - [ ] **Step 1: Test** `test_simulate_comment_creates_comment`, `test_simulate_bank_auto_matches` (content chứa mã đơn → matched), `test_simulator_disabled_for_assistant` (AccessError).
@@ -332,12 +332,12 @@ def test_payment_created_in_bank_journal(self): ...  # tx.payment_id.journal_id 
 **Interfaces:**
 - Manifest `depends`: `["livestream_sale", "payment"]`.
 - `payment.provider`: `code` `selection_add=[("sepay","SePay")]`, `ondelete={"sepay": "set default"}`. Field: `sepay_webhook_api_key` Char (groups=base.group_system), `sepay_api_token` Char (groups=base.group_system), `sepay_account_number` Char, `sepay_last_pulled_id` Integer. `_get_default_payment_method_codes()` → `{"sepay"}` khi code là `sepay`. Data: `payment.method` code `sepay` ("Chuyển khoản (SePay)"), provider `payment_provider_sepay` ở state `disabled`.
-- `livestream.webhook.event.source` `selection_add=[("sepay","SePay")]`. `_process_sepay(payload)`: bỏ qua khi `transferType != "in"`; tìm provider qua `payload["_provider_id"]` (controller gắn vào) → `livestream.bank.transaction._register(provider, sepay_webhook_to_vals(payload))`.
+- `livestream.webhook.event.source` `selection_add=[("sepay","SePay")]`. `_process_sepay(payload)`: bỏ qua khi `transferType != "in"`; tìm provider qua `payload["_provider_id"]` (controller gắn vào) → `livestream.bank.transaction._register_transfer(provider, sepay_webhook_to_vals(payload))`.
 - `sepay_api.sepay_webhook_to_vals(p: dict) -> dict`: `external_id=str(p["id"])`, `date` (parse `transactionDate` `"%Y-%m-%d %H:%M:%S"` theo giờ `Asia/Ho_Chi_Minh` → UTC naive), `amount=p["transferAmount"]`, `content=p["content"]`, `reference=p["referenceCode"]`, `account_number=p["accountNumber"]`, `gateway=p["gateway"]`, `raw_payload=p`.
 - `sepay_api.sepay_api_to_vals(t: dict) -> dict` cho bản ghi của `transactions/list` (`id, transaction_date, amount_in, transaction_content, reference_number, account_number, bank_brand_name`); bỏ qua dòng `amount_in == 0`. Dùng cùng `external_id` với webhook (id SePay giống nhau), nên dữ liệu kéo bù không bị trùng.
 - `sepay_api.fetch_transactions(token: str, account_number: str, since_id: int) -> list[dict]`: `GET https://my.sepay.vn/userapi/transactions/list`, header `Authorization: Bearer <token>`, params `account_number`, `since_id`, `limit=100`, timeout 15s. Lỗi HTTP thì raise.
 - Controller `POST /livestream/sepay/webhook/<int:provider_id>` (`type="http"`, `auth="public"`, `csrf=False`): kiểm tra header `Authorization == "Apikey " + provider.sepay_webhook_api_key` bằng `hmac.compare_digest`, sai thì trả 401. Đúng thì `_enqueue("sepay", payload | {"_provider_id": id})` → trả JSON `{"success": true}` mã 200.
-- Cron `ir_cron_sepay_pull` (5 phút): `payment.provider._sepay_cron_pull()` cho mọi provider `sepay` đang bật → `fetch_transactions` → `_register` → cập nhật `sepay_last_pulled_id`.
+- Cron `ir_cron_sepay_pull` (5 phút): `payment.provider._sepay_cron_pull()` cho mọi provider `sepay` đang bật → `fetch_transactions` → `_register_transfer` → cập nhật `sepay_last_pulled_id`.
 - **Trước khi viết code:** đối chiếu tên trường webhook và API với tài liệu SePay hiện hành (docs.sepay.vn). Nếu khác với ở trên thì sửa payload mẫu và ghi chú vào commit.
 
 - [ ] **Step 1: Test**

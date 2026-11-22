@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="livestream_unmatch_wizard_view_form" model="ir.ui.view">
+        <field name="name">livestream.unmatch.wizard.form</field>
+        <field name="model">livestream.unmatch.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <p>The deposit payment will be cancelled and the transfer becomes available for matching again.</p>
+                <group>
+                    <field name="transaction_id" readonly="1"/>
+                    <field name="reason" placeholder="Why is this match wrong?"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Unmatch" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="livestream_unmatch_wizard_action" model="ir.actions.act_window">
+        <field name="name">Unmatch Bank Transfer</field>
+        <field name="res_model">livestream.unmatch.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_transaction_id': active_id}</field>
+    </record>
+</odoo>

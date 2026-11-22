@@ -14,6 +14,7 @@ class LivestreamCommon(AccountPaymentCommon):
     @AccountTestInvoicingCommon.setup_country("vn")
     def setUpClass(cls):
         super().setUpClass()
+        cls.enable_post_process_patcher = False  # we need real account.payment creation
         cls.env.user.group_ids |= cls.env.ref("livestream_sale.group_livestream_manager")
         company = cls.company_data["company"]
         company.partner_id.write({"country_id": cls.env.ref("base.vn").id, "city": "Ha Noi"})

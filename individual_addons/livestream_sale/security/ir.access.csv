@@ -13,3 +13,7 @@ access_livestream_comment_user,livestream.comment user,livestream.comment,group_
 access_livestream_comment_manager,livestream.comment manager,livestream.comment,group_livestream_manager,crud,
 access_livestream_webhook_event_manager,livestream.webhook.event manager,livestream.webhook.event,group_livestream_manager,crud,
 livestream_comment_comp_rule,Livestream comment multi-company,livestream.comment,,crud,"[('company_id', 'in', company_ids)]"
+access_livestream_bank_transaction_user,livestream.bank.transaction user,livestream.bank.transaction,group_livestream_user,r,
+access_livestream_bank_transaction_manager,livestream.bank.transaction manager,livestream.bank.transaction,group_livestream_manager,cru,
+livestream_bank_transaction_comp_rule,Livestream bank transaction multi-company,livestream.bank.transaction,,crud,"[('company_id', 'in', company_ids)]"
+access_livestream_unmatch_wizard_manager,livestream.unmatch.wizard manager,livestream.unmatch.wizard,group_livestream_manager,crud,

@@ -7,6 +7,8 @@
               action="livestream_session_action" sequence="20"/>
     <menuitem id="menu_livestream_comments" name="Comments" parent="menu_livestream_root"
               action="livestream_comment_action" sequence="30"/>
+    <menuitem id="menu_livestream_bank" name="Bank Transfers" parent="menu_livestream_root"
+              action="livestream_bank_transaction_action" sequence="40"/>
     <menuitem id="menu_livestream_config" name="Configuration" parent="menu_livestream_root"
               sequence="90" groups="group_livestream_manager"/>
     <menuitem id="menu_livestream_accounts" name="Connected Accounts" parent="menu_livestream_config"

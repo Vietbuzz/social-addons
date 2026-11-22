@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="livestream_bank_transaction_view_list" model="ir.ui.view">
+        <field name="name">livestream.bank.transaction.list</field>
+        <field name="model">livestream.bank.transaction</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-success="state == 'matched'" decoration-warning="state == 'unmatched'" decoration-muted="state == 'ignored'">
+                <field name="date"/>
+                <field name="gateway"/>
+                <field name="amount" sum="Total"/>
+                <field name="content"/>
+                <field name="reference" optional="hide"/>
+                <field name="state" widget="badge"/>
+                <field name="sale_order_id"/>
+                <field name="match_method" optional="show"/>
+                <field name="matched_by" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="livestream_bank_transaction_view_form" model="ir.ui.view">
+        <field name="name">livestream.bank.transaction.form</field>
+        <field name="model">livestream.bank.transaction</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="%(livestream_unmatch_wizard_action)d" type="action" string="Unmatch"
+                            invisible="state != 'matched'" groups="livestream_sale.group_livestream_manager"/>
+                    <button name="action_ignore" type="object" string="Ignore"
+                            invisible="state != 'unmatched'" groups="livestream_sale.group_livestream_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Bank data">
+                            <field name="date" readonly="1"/>
+                            <field name="amount" readonly="1"/>
+                            <field name="content" readonly="1"/>
+                            <field name="gateway" readonly="1"/>
+                            <field name="account_number" readonly="1"/>
+                            <field name="reference" readonly="1"/>
+                            <field name="external_id" readonly="1"/>
+                            <field name="provider_id" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Matching">
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="match_method" readonly="1"/>
+                            <field name="matched_by"/>
+                            <field name="matched_at"/>
+                            <field name="payment_transaction_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="livestream_bank_transaction_view_search" model="ir.ui.view">
+        <field name="name">livestream.bank.transaction.search</field>
+        <field name="model">livestream.bank.transaction</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="content"/>
+                <field name="sale_order_id"/>
+                <field name="amount"/>
+                <filter name="unmatched" string="Unmatched" domain="[('state', '=', 'unmatched')]"/>
+                <filter name="matched" string="Matched" domain="[('state', '=', 'matched')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="livestream_bank_transaction_action" model="ir.actions.act_window">
+        <field name="name">Bank Transfers</field>
+        <field name="res_model">livestream.bank.transaction</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_unmatched': 1}</field>
+    </record>
+
+</odoo>

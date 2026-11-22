@@ -30,6 +30,9 @@ class SaleOrder(models.Model):
         "Deposit Due", compute="_compute_livestream_deposit_due", currency_field="currency_id",
     )
     is_livestream = fields.Boolean(compute="_compute_is_livestream", store=True)
+    livestream_bank_transaction_ids = fields.One2many(
+        "livestream.bank.transaction", "sale_order_id", "Bank Transfers",
+    )
 
     _livestream_payment_ref_uniq = models.UniqueIndex(
         "(livestream_payment_ref) WHERE livestream_payment_ref IS NOT NULL",
