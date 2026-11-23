@@ -51,6 +51,17 @@ class SaleOrder(models.Model):
     # ------------------------------------------------------------------
     # Deposit guard
     # ------------------------------------------------------------------
+    def write(self, vals):
+        if (
+            {"prepayment_amount", "prepayment_percent"} & set(vals)
+            and not self.env.context.get("livestream_set_deposit")
+            and not self.env.su
+            and any(o.is_livestream for o in self)
+            and not self.env.user.has_group("livestream_sale.group_livestream_manager")
+        ):
+            raise UserError(self.env._("Only a livestream manager can change the deposit of a livestream order."))
+        return super().write(vals)
+
     def action_confirm(self):
         short = self.filtered(lambda o: o.is_livestream and not o._is_confirmation_amount_reached())
         if short:

@@ -6,3 +6,4 @@ from . import test_sale_order
 from . import test_bank_matching
 from . import test_simulator
 from . import test_console
+from . import test_review_fixes

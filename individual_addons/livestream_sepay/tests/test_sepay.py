@@ -106,3 +106,25 @@ class TestSepay(LivestreamCommon, HttpCase):
         vals = sepay_api.sepay_webhook_to_vals(self._webhook_body())
         self.assertEqual(vals["date"], datetime(2026, 11, 22, 7, 2, 37))
         self.assertEqual(vals["amount"], 100000)
+
+    def test_cron_pull_bad_row_does_not_block(self):
+        listing = payload("transactions_list.json")["transactions"]
+        Tx = self.registry["livestream.bank.transaction"]
+        real = Tx._register_transfer
+
+        def flaky(model, provider, vals):
+            if vals["external_id"] == "92704":
+                raise ValueError("boom")
+            return real(model, provider, vals)
+
+        with patch.object(sepay_api, "fetch_transactions", return_value=listing), \
+                patch.object(Tx, "_register_transfer", autospec=True, side_effect=flaky), \
+                mute_logger("odoo.addons.livestream_sepay.models.payment_provider"):
+            self.env["payment.provider"]._sepay_cron_pull()
+        self.assertTrue(self.Tx.search([("external_id", "=", "92705")]))
+        self.assertEqual(self.sepay.sepay_last_pulled_id, 92705)
+
+    def test_webhook_event_company_is_provider_company(self):
+        self._post(self._webhook_body())
+        event = self.env["livestream.webhook.event"].search([("source", "=", "sepay")])
+        self.assertEqual(event.company_id, self.sepay.company_id)

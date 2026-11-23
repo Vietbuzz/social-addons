@@ -25,13 +25,20 @@ class LivestreamSession(models.Model):
     @api.model
     def _fb_upsert_live(self, account, live):
         session = self.search([("account_id", "=", account.id), ("external_video_id", "=", live["id"])], limit=1)
-        state = "live" if live.get("status", "").lower() == "live" else "ended"
+        status = (live.get("status") or "").upper()
+        if status == "LIVE":
+            state = "live"
+        elif "SCHEDULED" in status or "UNPUBLISHED" in status or status == "PREVIEW":
+            state = "draft"
+        else:
+            state = "ended"
         vals = {"state": state}
         video_id = (live.get("video") or {}).get("id")
         if video_id:
             vals["external_post_id"] = f"{account.external_id}_{video_id}"
         if session:
-            if session.state != state and not (session.state == "ended" and state == "live"):
+            # never reopen an ended live (late/out-of-order events); draft -> live is allowed
+            if session.state != state and session.state != "ended":
                 session.write(vals)
             return session
         return self.create({
@@ -62,7 +69,12 @@ class LivestreamSession(models.Model):
                 author = row.get("from") or {}
                 if author.get("id") == account.external_id:
                     continue
-                Comment._ingest(
-                    session, row["id"], author.get("id") or f"anon:{row['id']}", author.get("name") or "Facebook user",
-                    row.get("message", ""), graph_api.parse_time(row.get("created_time")),
-                )
+                try:
+                    with self.env.cr.savepoint():
+                        Comment._ingest(
+                            session, row["id"], author.get("id") or f"anon:{row['id']}",
+                            author.get("name") or "Facebook user",
+                            row.get("message", ""), graph_api.parse_time(row.get("created_time")),
+                        )
+                except Exception as e:  # noqa: BLE001 - e.g. webhook committed the same comment meanwhile
+                    _logger.info("Skipped pulled comment %s: %s", row.get("id"), e)

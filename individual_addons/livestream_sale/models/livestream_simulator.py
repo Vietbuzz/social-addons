@@ -60,6 +60,8 @@ class LivestreamSimulator(models.AbstractModel):
         customer = channel.livestream_customer_id
         if not customer:
             raise UserError(self.env._("Not a livestream conversation."))
+        if customer.account_id.platform != "simulator":
+            raise UserError(self.env._("Customer replies can only be simulated on simulator accounts."))
         if not customer.psid:
             customer.psid = f"sim-{customer.external_user_id}"
         customer._receive_message(text, f"sim-mid-{uuid.uuid4().hex[:12]}")
@@ -67,16 +69,20 @@ class LivestreamSimulator(models.AbstractModel):
     @api.model
     def simulate_bank(self, account_id, amount, content):
         self._check_simulator_access()
-        account = self.env["livestream.account"].sudo().browse(account_id).exists()
-        if not account.payment_provider_id:
+        account = self.env["livestream.account"].browse(account_id).exists()
+        account.check_access("read")  # record rules: own companies only
+        provider = account.sudo().payment_provider_id
+        if not provider:
             raise UserError(self.env._("Set a deposit provider on the account first."))
-        tx = self.env["livestream.bank.transaction"]._register_transfer(account.payment_provider_id, {
+        if provider.is_live:
+            raise UserError(self.env._("Simulated transfers are refused on a live payment provider."))
+        tx = self.env["livestream.bank.transaction"]._register_transfer(provider, {
             "external_id": f"SIM-{uuid.uuid4().hex[:12]}",
             "date": fields.Datetime.now(),
             "amount": amount,
             "content": content,
             "reference": f"SIM{random.randint(100000, 999999)}",
-            "account_number": account.payment_provider_id.journal_id.bank_account_id.account_number or "",
+            "account_number": provider.journal_id.bank_account_id.account_number or "",
             "gateway": "Simulator",
             "raw_payload": {"simulated": True},
         })

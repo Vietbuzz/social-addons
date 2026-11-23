@@ -1,6 +1,6 @@
 import re
 
-from odoo import api, models
+from odoo import api, fields, models
 
 
 def normalize_vn_phone(phone):
@@ -14,15 +14,23 @@ def normalize_vn_phone(phone):
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    livestream_phone_norm = fields.Char(
+        "Normalized Phone", compute="_compute_livestream_phone_norm", store=True, index="btree_not_null",
+    )
+
+    @api.depends("phone")
+    def _compute_livestream_phone_norm(self):
+        for partner in self:
+            partner.livestream_phone_norm = normalize_vn_phone(partner.phone) or False
+
     @api.model
     def _livestream_find_or_create(self, name, phone, street=None):
         phone_norm = normalize_vn_phone(phone)
         if phone_norm and len(phone_norm) >= 9:
-            candidates = self.search([("phone", "ilike", phone_norm[-9:][:3])], limit=200)
-            # ilike on a short chunk then exact compare: phones are stored in many shapes
-            for partner in candidates:
-                if normalize_vn_phone(partner.phone) == phone_norm:
-                    if street and not partner.street:
-                        partner.street = street
-                    return partner
-        return self.create({"name": name, "phone": phone_norm or phone, "street": street})
+            partner = self.search([("livestream_phone_norm", "=", phone_norm)], order="id", limit=1)
+            if partner:
+                if street and not partner.street:
+                    partner.sudo().street = street
+                return partner
+        # sudo: assistants (salesmen) may not create contacts; values are limited to name/phone/street
+        return self.sudo().create({"name": name, "phone": phone_norm or phone, "street": street}).sudo(False)

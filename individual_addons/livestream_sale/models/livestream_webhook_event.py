@@ -52,6 +52,11 @@ class LivestreamWebhookEvent(models.Model):
                 _logger.warning("Livestream event %s failed: %s", event.id, e)
                 event.write({"state": "error", "error": str(e)})
 
+    def action_retry(self):
+        self.filtered(lambda e: e.state == "error").write({"state": "pending", "error": False})
+        self._process()
+        return True
+
     @api.model
     def _cron_process(self, limit=200):
         self.search([("state", "=", "pending")], order="id", limit=limit)._process()

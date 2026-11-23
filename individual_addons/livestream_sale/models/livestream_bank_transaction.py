@@ -2,6 +2,8 @@ import re
 import unicodedata
 from datetime import timedelta
 
+import logging
+
 import psycopg2
 
 from odoo import api, fields, models
@@ -9,7 +11,9 @@ from odoo.exceptions import UserError
 
 from .res_partner import normalize_vn_phone
 
-REF_RE = re.compile(r"LS(\d{6})(?!\d)")
+_logger = logging.getLogger(__name__)
+
+REF_RE = re.compile(r"L\W?S\W?(\d{6,7})(?!\d)")
 IMMUTABLE_FIELDS = {
     "provider_id", "external_id", "date", "amount", "content", "reference",
     "account_number", "gateway", "raw_payload",
@@ -81,9 +85,21 @@ class LivestreamBankTransaction(models.Model):
         if existing:
             return existing.sudo(False)
         tx = self.sudo().create({**vals, "provider_id": provider.id})
-        if not tx._try_auto_match():
+        matched = False
+        try:
+            with self.env.cr.savepoint():
+                matched = tx._try_auto_match()
+        except Exception as e:  # noqa: BLE001 - never lose a recorded transfer because matching failed
+            _logger.warning("Auto-match of bank transaction %s failed: %s", tx.id, e)
+            tx.message_post(body=self.env._("Automatic matching failed: %s", e))
+        if not matched:
             tx._notify()
         return tx.sudo(False)
+
+    @staticmethod
+    def _strip_accents(text):
+        text = unicodedata.normalize("NFKD", text or "")
+        return "".join(c for c in text if not unicodedata.combining(c)).replace("đ", "d").replace("Đ", "D").upper()
 
     @staticmethod
     def _normalize(text):
@@ -91,9 +107,13 @@ class LivestreamBankTransaction(models.Model):
         text = "".join(c for c in text if not unicodedata.combining(c)).replace("đ", "d").replace("Đ", "D")
         return re.sub(r"[^A-Z0-9]", "", text.upper())
 
+    def _find_refs(self):
+        self.ensure_one()
+        return {f"LS{num}" for num in REF_RE.findall(self._strip_accents(self.content))}
+
     def _find_ref_orders(self):
         self.ensure_one()
-        refs = {f"LS{num}" for num in REF_RE.findall(self._normalize(self.content))}
+        refs = self._find_refs()
         if not refs:
             return self.env["sale.order"]
         return self.env["sale.order"].sudo().search([
@@ -102,6 +122,8 @@ class LivestreamBankTransaction(models.Model):
 
     def _try_auto_match(self):
         self.ensure_one()
+        if len(self._find_refs()) != 1:
+            return False
         orders = self._find_ref_orders()
         if len(orders) != 1 or orders.state == "cancel":
             return False
@@ -141,7 +163,7 @@ class LivestreamBankTransaction(models.Model):
         pay_tx = self.env["payment.transaction"].sudo().with_context(payment_safe_write=True).create({
             "provider_id": provider.id,
             "payment_method_id": method_rec.id,
-            "reference": f"{order_sudo.livestream_payment_ref or order_sudo.name}-{self.external_id}",
+            "reference": self._payment_reference(order_sudo),
             "provider_reference": self.external_id,
             "amount": self.amount,
             "currency_id": self.currency_id.id,
@@ -172,6 +194,16 @@ class LivestreamBankTransaction(models.Model):
             )
         self._notify()
         return pay_tx
+
+    def _payment_reference(self, order):
+        """Unique payment.transaction reference (a transfer may be re-matched after an unmatch)."""
+        base = f"{order.livestream_payment_ref or order.name}-{self.external_id}"
+        PaymentTx = self.env["payment.transaction"].sudo()
+        reference, n = base, 1
+        while PaymentTx.search_count([("reference", "=", reference)], limit=1):
+            n += 1
+            reference = f"{base}-{n}"
+        return reference
 
     def action_match_manual(self, order_id):
         self.ensure_one()

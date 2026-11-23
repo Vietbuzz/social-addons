@@ -17,3 +17,4 @@ access_livestream_bank_transaction_user,livestream.bank.transaction user,livestr
 access_livestream_bank_transaction_manager,livestream.bank.transaction manager,livestream.bank.transaction,group_livestream_manager,cru,
 livestream_bank_transaction_comp_rule,Livestream bank transaction multi-company,livestream.bank.transaction,,crud,"[('company_id', 'in', company_ids)]"
 access_livestream_unmatch_wizard_manager,livestream.unmatch.wizard manager,livestream.unmatch.wizard,group_livestream_manager,crud,
+livestream_session_tag_comp_rule,Livestream tag multi-company,livestream.session.tag,,crud,"[('session_id.company_id', 'in', company_ids)]"

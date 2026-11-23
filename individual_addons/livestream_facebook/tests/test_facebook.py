@@ -163,3 +163,43 @@ class TestFacebook(LivestreamCommon, HttpCase):
         self.assertEqual(req.call_args.args[1], "LIVE1/comments")
         comment = self.Comment.search([("external_id", "=", "VID1_C9")])
         self.assertEqual(comment.tag_code, "69")
+
+    def test_scheduled_live_then_live(self):
+        Session = self.env["livestream.session"]
+        session = Session._fb_upsert_live(self.fb, {"id": "LIVE2", "status": "SCHEDULED_UNPUBLISHED"})
+        self.assertEqual(session.state, "draft")
+        Session._fb_upsert_live(self.fb, {"id": "LIVE2", "status": "UNPUBLISHED"})
+        self.assertEqual(session.state, "draft")
+        Session._fb_upsert_live(self.fb, {"id": "LIVE2", "status": "LIVE"})
+        self.assertEqual(session.state, "live")
+        Session._fb_upsert_live(self.fb, {"id": "LIVE2", "status": "LIVE_STOPPED"})
+        self.assertEqual(session.state, "ended")
+        Session._fb_upsert_live(self.fb, {"id": "LIVE2", "status": "LIVE"})  # late event: stays ended
+        self.assertEqual(session.state, "ended")
+
+    def test_cron_pull_one_bad_row_does_not_lose_batch(self):
+        data = {"data": [
+            {"id": "VID1_C21", "from": {"id": "U21", "name": "A"}, "message": "69", "created_time": "2026-11-22T07:00:01+0000"},
+            {"id": "VID1_C20", "from": {"id": "U20", "name": "B"}, "message": "69", "created_time": "2026-11-22T07:00:00+0000"},
+        ]}
+        Comment = self.registry["livestream.comment"]
+        real = Comment._ingest
+
+        def flaky(model, session, external_id, *args, **kwargs):
+            if external_id == "VID1_C20":
+                raise ValueError("race")
+            return real(model, session, external_id, *args, **kwargs)
+
+        with patch.object(graph_api, "_request", return_value=data), \
+                patch.object(Comment, "_ingest", autospec=True, side_effect=flaky), \
+                mute_logger("odoo.addons.livestream_facebook.models.livestream_session"):
+            self.env["livestream.session"]._fb_cron_pull_comments()
+        self.assertTrue(self.Comment.search([("external_id", "=", "VID1_C21")]))
+
+    def test_simulated_reply_refused_on_facebook(self):
+        self._deliver("feed_comment.json")
+        comment = self.Comment.search([("external_id", "=", "VID1_C1")])
+        channel_id = comment.action_open_conversation()["channel_id"]
+        with self.assertRaises(UserError):
+            self.env["livestream.simulator"].simulate_customer_reply(channel_id, "fake")
+        self.assertFalse(comment.customer_id.psid)

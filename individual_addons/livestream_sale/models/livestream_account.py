@@ -30,11 +30,12 @@ class LivestreamAccount(models.Model):
     def _notify_console(self, notification_type, payload):
         """Push items to every open operator console (clients filter on account_id)."""
         self.ensure_one()
-        self.env.ref("livestream_sale.group_livestream_user")._bus_send(notification_type, {
-            "account_id": self.id,
-            "company_id": self.company_id.id,
-            "items": payload,
-        })
+        message = {"account_id": self.id, "company_id": self.company_id.id, "items": payload}
+        users = self.env.ref("livestream_sale.group_livestream_user").sudo().all_user_ids.filtered(
+            lambda u: self.company_id in u.company_ids
+        )
+        for partner in users.partner_id:
+            partner._bus_send(notification_type, message)
 
     # Platform hooks: connector modules override these for their platform.
     def _livestream_private_reply(self, comment, body, attachments):

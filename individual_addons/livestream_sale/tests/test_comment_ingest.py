@@ -42,9 +42,7 @@ class TestCommentIngest(LivestreamCommon):
         self.assertEqual(payload["account_id"], self.ls_account.id)
         item = payload["items"][0]
         self.assertEqual((item["id"], item["tag_code"], item["product_name"]), (comment.id, "69", "Ao thun do"))
-        self.assertEqual(
-            sendone.call_args.args[1], self.env.ref("livestream_sale.group_livestream_user"),
-        )
+        self.assertIn(sendone.call_args.args[1], (self.env.user, self.env.user.partner_id))
 
     def test_event_error_isolated(self):
         bad = self.Event._enqueue("simulator", {"kind": "broken"}, self.ls_account)

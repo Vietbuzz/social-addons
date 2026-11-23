@@ -42,6 +42,9 @@
         <field name="model">livestream.webhook.event</field>
         <field name="arch" type="xml">
             <list create="0" decoration-danger="state == 'error'">
+                <header>
+                    <button name="action_retry" type="object" string="Retry"/>
+                </header>
                 <field name="create_date"/>
                 <field name="source"/>
                 <field name="account_id"/>

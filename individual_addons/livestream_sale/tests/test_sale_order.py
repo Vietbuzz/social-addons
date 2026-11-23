@@ -47,7 +47,9 @@ class TestLivestreamOrder(LivestreamCommon):
 
     def test_payment_refs_unique(self):
         so1 = self._create_order()
-        so2 = self._create_order()
+        so2 = self._create_order(comment=self.env["livestream.comment"]._ingest(
+            self.session, "c2", "u2", "Tran B", "69", fields.Datetime.now(),
+        ))
         self.assertNotEqual(so1.livestream_payment_ref, so2.livestream_payment_ref)
 
     def test_partner_merge_by_phone(self):
@@ -101,5 +103,7 @@ class TestLivestreamOrder(LivestreamCommon):
         attachments = pr.call_args.args[3]
         self.assertEqual(len(attachments), 1)
         self.assertEqual(attachments.mimetype, "image/png")
-        last = so.livestream_channel_id.message_ids[:1]
-        self.assertIn(so.livestream_payment_ref, last.body)
+        request = so.livestream_channel_id.message_ids.filtered(
+            lambda m: m.subtype_id == self.env.ref("mail.mt_comment")
+        )[:1]
+        self.assertIn(so.livestream_payment_ref, request.body)

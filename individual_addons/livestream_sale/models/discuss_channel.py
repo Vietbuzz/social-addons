@@ -74,6 +74,14 @@ class DiscussChannel(models.Model):
         elif comment and not comment.private_reply_sent:
             psid = account._livestream_private_reply(comment, body, attachments)
             comment.private_reply_sent = True
+            if attachments:
+                self.message_post(
+                    body=self.env._(
+                        "Attachments (QR image) were not delivered: a private reply can only carry text. "
+                        "Send them again once the customer replies.",
+                    ),
+                    message_type="comment", subtype_xmlid="mail.mt_note",
+                )
             if psid and not customer.psid:
                 customer.psid = psid
         elif customer.psid:

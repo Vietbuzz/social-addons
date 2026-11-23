@@ -84,6 +84,8 @@ class LivestreamComment(models.Model):
         channel.sudo().livestream_origin_comment_id = self
         if not self.channel_id:
             self.channel_id = channel
+        if self.sale_order_id and not self.sale_order_id.livestream_channel_id:
+            self.sale_order_id.livestream_channel_id = channel
         if self.state == "new":
             self.state = "contacted"
         return {"channel_id": channel.id, "comment": self._console_format()}
@@ -93,6 +95,10 @@ class LivestreamComment(models.Model):
         self.ensure_one()
         if not lines:
             raise UserError(self.env._("Add at least one product."))
+        if self.sale_order_id and self.sale_order_id.state != "cancel":
+            raise UserError(self.env._("Comment already has order %s.", self.sale_order_id.name))
+        if (deposit_amount or 0) <= 0 and not self.env.user.has_group("livestream_sale.group_livestream_manager"):
+            raise UserError(self.env._("A deposit is required; only a manager can create an order without deposit."))
         customer = self.customer_id
         partner = self.env["res.partner"]._livestream_find_or_create(name or customer.name, phone, street)
         if customer.partner_id != partner:
@@ -119,6 +125,6 @@ class LivestreamComment(models.Model):
             ],
         })
         # prepayment_amount inverts into prepayment_percent: set it once lines exist
-        order.prepayment_amount = deposit_amount or 0.0
+        order.with_context(livestream_set_deposit=True).prepayment_amount = deposit_amount or 0.0
         self.write({"state": "ordered", "sale_order_id": order.id})
         return order.id

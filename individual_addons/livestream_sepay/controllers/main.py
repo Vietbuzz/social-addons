@@ -23,5 +23,5 @@ class SepayController(http.Controller):
         except ValueError:
             payload = dict(form)  # SePay can also post form-encoded data
         payload["_provider_id"] = provider.id
-        request.env["livestream.webhook.event"].sudo()._enqueue("sepay", payload)
+        request.env["livestream.webhook.event"].sudo().with_company(provider.company_id)._enqueue("sepay", payload)
         return request.make_json_response({"success": True}, status=200)

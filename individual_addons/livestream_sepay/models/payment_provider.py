@@ -48,6 +48,11 @@ class PaymentProvider(models.Model):
             for row in sorted(rows, key=lambda r: int(r["id"])):
                 max_id = max(max_id, int(row["id"]))
                 vals = sepay_api.sepay_api_to_vals(row)
-                if vals:
-                    Tx._register_transfer(provider, vals)
+                if not vals:
+                    continue
+                try:
+                    with self.env.cr.savepoint():
+                        Tx._register_transfer(provider, vals)
+                except Exception as e:  # noqa: BLE001 - e.g. webhook committed the same transfer meanwhile
+                    _logger.warning("SePay transaction %s skipped by pull: %s", row.get("id"), e)
             provider.sepay_last_pulled_id = max_id
