@@ -18,6 +18,10 @@ export class BankFeed extends Component {
         return this.props.model.state;
     }
 
+    get unmatchedCount() {
+        return this.state.bankTransactions.filter((t) => t.state === "unmatched").length;
+    }
+
     get openOrder() {
         return this.state.panel?.order;
     }

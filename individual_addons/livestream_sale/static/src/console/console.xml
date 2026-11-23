@@ -129,8 +129,13 @@
     </t>
 
     <t t-name="livestream_sale.OrderPanel">
-        <div class="o_ls_order p-2 border-bottom">
-            <h6 class="mb-2">Customer order</h6>
+        <div class="o_ls_order o_ls_card card">
+            <div class="card-header o_ls_card_header_order d-flex align-items-center gap-2">
+                <i class="fa fa-shopping-cart"/>
+                <span class="fw-bold">Customer order</span>
+                <span t-if="this.order" class="badge text-bg-light ms-auto" t-out="this.order.name"/>
+            </div>
+            <div class="card-body p-2">
             <div t-if="!this.state.panel" class="text-muted small">No customer selected.</div>
             <t t-elif="!this.order">
                 <table class="table table-sm align-middle mb-2">
@@ -191,20 +196,25 @@
                 <div t-elif="this.order.qr_error" class="alert alert-warning small p-2" t-out="this.order.qr_error"/>
                 <div t-elif="this.order.deposit_due &lt;= 0" class="alert alert-success small p-2 mb-0"><i class="fa fa-check me-1"/>Deposit fully received.</div>
             </t>
+            </div>
         </div>
     </t>
 
     <t t-name="livestream_sale.BankFeed">
-        <div class="o_ls_bank d-flex flex-column flex-grow-1 min-h-0">
-            <div class="d-flex align-items-center p-2 border-bottom">
-                <h6 class="mb-0">Incoming transfers</h6>
-                <button t-if="this.state.canSimulate" class="btn btn-sm btn-outline-secondary ms-auto o_ls_sim_bank"
+        <div class="o_ls_bank o_ls_card card d-flex flex-column flex-grow-1 min-h-0">
+            <div class="card-header o_ls_card_header_bank d-flex align-items-center gap-2">
+                <i class="fa fa-university"/>
+                <span class="fw-bold">Incoming transfers</span>
+                <span t-if="this.unmatchedCount" class="badge text-bg-warning" t-att-title="'Unmatched'">
+                    <t t-out="this.unmatchedCount"/> to match
+                </span>
+                <button t-if="this.state.canSimulate" class="btn btn-sm btn-light ms-auto o_ls_sim_bank"
                         t-on-click="() => this.simulate()"><i class="fa fa-flask"/> Transfer</button>
             </div>
-            <div class="o_ls_scroll flex-grow-1">
+            <div class="o_ls_scroll o_ls_bank_body flex-grow-1 p-2">
                 <div t-if="!this.state.bankTransactions.length" class="p-3 text-center text-muted small">No transfers yet.</div>
                 <t t-foreach="this.state.bankTransactions" t-as="tx" t-key="tx.id">
-                    <div class="o_ls_tx p-2 border-bottom"
+                    <div class="o_ls_tx p-2 mb-2 rounded"
                          t-att-class="{ 'o_ls_tx_matched': tx.state === 'matched', 'o_ls_tx_unmatched': tx.state === 'unmatched', 'text-muted': tx.state === 'ignored', 'o_ls_flash': this.state.highlight['t' + tx.id] }">
                         <div class="d-flex align-items-center gap-2">
                             <strong t-out="this.formatVnd(tx.amount)"/>
