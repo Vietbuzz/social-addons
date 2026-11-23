@@ -3,6 +3,7 @@
     "version": "20.0.1.0.0",
     "category": "Sales/Sales",
     "summary": "Sell from social livestreams: comments, chat, orders and verified deposits",
+    "description": " ",  # README.md is a setup guide, not the module description
     "depends": ["sale_management", "mail", "bus", "account_payment", "l10n_vn"],
     "data": [
         "security/livestream_security.xml",
