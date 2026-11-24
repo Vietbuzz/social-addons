@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
-import { ConsoleModel } from "./console_model";
+import { ConsoleModel, platformInfo } from "./console_model";
 import { CommentFeed } from "./comment_feed";
 import { ConversationPanel } from "./conversation_panel";
 import { OrderPanel } from "./order_panel";
@@ -12,6 +12,8 @@ import { BankFeed } from "./bank_feed";
 export class LivestreamConsole extends Component {
     static template = "livestream_sale.Console";
     static components = { CommentFeed, ConversationPanel, OrderPanel, BankFeed };
+
+    platformInfo = platformInfo;
 
     props = useProps(standardActionServiceProps);
 

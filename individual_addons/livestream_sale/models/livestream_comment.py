@@ -65,6 +65,7 @@ class LivestreamComment(models.Model):
         return {
             "id": self.id,
             "session_id": self.session_id.id,
+            "platform": self.session_id.platform,
             "customer_id": self.customer_id.id,
             "customer_name": self.customer_id.name,
             "avatar_url": self.customer_id.avatar_url or False,

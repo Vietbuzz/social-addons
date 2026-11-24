@@ -3,6 +3,16 @@ import { _t } from "@web/core/l10n/translation";
 
 const vnd = new Intl.NumberFormat("vi-VN");
 
+const PLATFORMS = {
+    facebook: { label: "FB", cls: "o_ls_pf_facebook", title: "Facebook" },
+    instagram: { label: "IG", cls: "o_ls_pf_instagram", title: "Instagram" },
+    simulator: { label: "SIM", cls: "o_ls_pf_simulator", title: "Simulator" },
+};
+
+export function platformInfo(platform) {
+    return PLATFORMS[platform] || { label: (platform || "?").slice(0, 3).toUpperCase(), cls: "o_ls_pf_simulator", title: platform };
+}
+
 export function formatVnd(amount) {
     return `${vnd.format(Math.round(amount || 0))} đ`;
 }

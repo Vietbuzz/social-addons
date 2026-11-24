@@ -1,8 +1,11 @@
 import { Component, types, useProps } from "@odoo/owl";
 import { formatDateTime, deserializeDateTime } from "@web/core/l10n/dates";
+import { platformInfo } from "./console_model";
 
 export class CommentFeed extends Component {
     static template = "livestream_sale.CommentFeed";
+
+    platformInfo = platformInfo;
 
     props = useProps({ model: types.object() });
 

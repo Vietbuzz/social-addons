@@ -85,6 +85,20 @@
     }
 }
 
+.o_livestream_console .o_ls_pf {
+    color: #fff;
+    font-weight: 600;
+    &.o_ls_pf_facebook {
+        background-color: #1877f2;
+    }
+    &.o_ls_pf_instagram {
+        background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af);
+    }
+    &.o_ls_pf_simulator {
+        background-color: $gray-600;
+    }
+}
+
 @keyframes o_ls_flash {
     from {
         background-color: rgba($warning, 0.45);

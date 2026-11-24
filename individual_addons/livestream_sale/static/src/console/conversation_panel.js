@@ -3,10 +3,13 @@ import { Thread } from "@mail/core/common/thread";
 import { Composer } from "@mail/core/common/composer";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
+import { platformInfo } from "./console_model";
 
 export class ConversationPanel extends Component {
     static template = "livestream_sale.ConversationPanel";
     static components = { Thread, Composer };
+
+    platformInfo = platformInfo;
 
     props = useProps({ model: types.object() });
 
@@ -38,6 +41,11 @@ export class ConversationPanel extends Component {
             return _t("Waiting for the customer to reply (1 private reply allowed per comment)");
         }
         return _t("Chat window closed (customer has not written for 24h)");
+    }
+
+    get igLiveHint() {
+        const session = this.state.session;
+        return session?.platform === "instagram" && session.state === "live";
     }
 
     get windowClass() {

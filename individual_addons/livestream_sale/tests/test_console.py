@@ -62,3 +62,9 @@ class TestConsole(LivestreamCommon):
         action = self.session.action_open_console()
         self.assertEqual(action["tag"], "livestream_console")
         self.assertEqual(action["params"]["session_id"], self.session.id)
+
+    def test_console_platform_fields(self):
+        data = self.Console.load(self.session.id)
+        self.assertEqual(data["session"]["platform"], "simulator")
+        self.assertTrue(all("platform" in s for s in data["sessions"]))
+        self.assertEqual(data["comments"][0]["platform"], "simulator")

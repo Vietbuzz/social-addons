@@ -7,9 +7,11 @@
                 <t t-if="this.state.session">
                     <select class="form-select form-select-sm w-auto" t-on-change="(ev) => this.onChangeSession(ev)">
                         <t t-foreach="this.state.sessions" t-as="s" t-key="s.id">
-                            <option t-att-value="s.id" t-att-selected="s.id === this.state.session.id" t-out="s.name"/>
+                            <option t-att-value="s.id" t-att-selected="s.id === this.state.session.id" t-out="'[' + this.platformInfo(s.platform).label + '] ' + s.name"/>
                         </t>
                     </select>
+                    <span class="badge o_ls_pf" t-att-class="this.platformInfo(this.state.session.platform).cls"
+                          t-out="this.platformInfo(this.state.session.platform).title"/>
                     <span t-if="this.state.session.state === 'live'" class="badge text-bg-danger"><i class="fa fa-circle me-1"/>LIVE</span>
                     <span t-else="" class="badge text-bg-secondary" t-out="this.state.session.state"/>
                     <button class="btn btn-sm btn-link" t-on-click="() => this.openSession()" title="Session settings"><i class="fa fa-cog"/></button>
@@ -72,6 +74,7 @@
                         <div t-else="" class="o_ls_avatar rounded-circle bg-200 d-flex align-items-center justify-content-center fw-bold" t-out="c.customer_name[0]"/>
                         <div class="flex-grow-1 min-w-0">
                             <div class="d-flex align-items-center gap-1">
+                                <span class="badge o_ls_pf" t-att-class="this.platformInfo(c.platform).cls" t-out="this.platformInfo(c.platform).label"/>
                                 <strong class="text-truncate" t-out="c.customer_name"/>
                                 <span t-if="c.tag_code" class="badge text-bg-info"><t t-out="c.tag_code"/><t t-if="c.quantity > 1"> ×<t t-out="c.quantity"/></t></span>
                                 <span class="ms-auto small text-muted" t-out="this.time(c.comment_time)"/>
@@ -96,10 +99,15 @@
             <t t-if="this.originComment">
                 <div class="p-2 border-bottom bg-100">
                     <div class="d-flex align-items-center gap-2">
+                        <span class="badge o_ls_pf" t-att-class="this.platformInfo(this.originComment.platform).cls"
+                              t-out="this.platformInfo(this.originComment.platform).label"/>
                         <strong t-out="this.originComment.customer_name"/>
                         <span class="badge" t-att-class="this.windowClass" t-out="this.windowLabel"/>
                         <button t-if="this.state.canSimulate" class="btn btn-sm btn-outline-secondary ms-auto"
                                 t-on-click="() => this.simulateReply()" title="Simulate customer reply"><i class="fa fa-flask"/> Reply</button>
+                    </div>
+                    <div t-if="this.igLiveHint" class="small text-danger mt-1">
+                        <i class="fa fa-clock-o me-1"/>Instagram: private replies only work while the live is running.
                     </div>
                     <div class="o_ls_origin mt-1 p-2 rounded border bg-view small">
                         <i class="fa fa-comment-o me-1"/> Comment: <em t-out="this.originComment.message"/>

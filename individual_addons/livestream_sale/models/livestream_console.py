@@ -21,7 +21,9 @@ class LivestreamConsole(models.AbstractModel):
                 or Session.search([], limit=1)
         sessions = Session.search([], limit=30)
         result = {
-            "sessions": [{"id": s.id, "name": s.name, "state": s.state} for s in sessions | session],
+            "sessions": [
+                {"id": s.id, "name": s.name, "state": s.state, "platform": s.platform} for s in sessions | session
+            ],
             "session": False,
             "comments": [],
             "bank_transactions": [],
@@ -34,6 +36,7 @@ class LivestreamConsole(models.AbstractModel):
             "id": session.id,
             "name": session.name,
             "state": session.state,
+            "platform": session.platform,
             "account_id": session.account_id.id,
             "tags": [{
                 "code": t.code, "product_id": t.product_id.id,
