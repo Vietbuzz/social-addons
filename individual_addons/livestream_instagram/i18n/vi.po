@@ -1,0 +1,113 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* livestream_instagram
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 20.0-20261112\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 12:20+0000\n"
+"PO-Revision-Date: 2026-11-24 12:20+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: livestream_instagram
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_account__display_name
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_session__display_name
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_webhook_event__display_name
+msgid "Display Name"
+msgstr "Tên hiển thị"
+
+#. module: livestream_instagram
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_account__id
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_session__id
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_webhook_event__id
+msgid "ID"
+msgstr ""
+
+#. module: livestream_instagram
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_account__ig_webhook_url
+msgid "Ig Webhook Url"
+msgstr ""
+
+#. module: livestream_instagram
+#: model:ir.model.fields.selection,name:livestream_instagram.selection__livestream_account__platform__instagram
+#: model:ir.model.fields.selection,name:livestream_instagram.selection__livestream_webhook_event__source__instagram
+msgid "Instagram"
+msgstr "Instagram"
+
+#. module: livestream_instagram
+#: model:ir.module.module,summary:base.module_livestream_instagram
+msgid "Instagram Live comments and Direct messages for the livestream console"
+msgstr "Bình luận Instagram Live và tin nhắn Direct cho bảng điều hành"
+
+#. module: livestream_instagram
+#. odoo-python
+#: code:addons/livestream_instagram/models/livestream_session.py:0
+msgid "Instagram live %s"
+msgstr "Live Instagram %s"
+
+#. module: livestream_instagram
+#. odoo-python
+#: code:addons/livestream_instagram/models/livestream_account.py:0
+msgid ""
+"Instagram only allows private replies during the live broadcast; this live "
+"has ended."
+msgstr "Instagram chỉ cho nhắn riêng trong lúc đang live; buổi live này đã kết thúc."
+
+#. module: livestream_instagram
+#: model:ir.model.fields,help:livestream_instagram.field_livestream_account__fb_page_id
+msgid ""
+"Instagram via Facebook Login: messages and private replies go through the "
+"linked Page."
+msgstr "Instagram qua Facebook Login: tin nhắn và nhắn riêng đi qua Page liên kết."
+
+#. module: livestream_instagram
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_account__fb_page_id
+msgid "Linked Facebook Page ID"
+msgstr "ID Facebook Page liên kết"
+
+#. module: livestream_instagram
+#: model:ir.model,name:livestream_instagram.model_livestream_account
+msgid "Livestream Connected Account"
+msgstr ""
+
+#. module: livestream_instagram
+#: model:ir.module.module,shortdesc:base.module_livestream_instagram
+msgid "Livestream Sale - Instagram"
+msgstr "Livestream Sale - Instagram"
+
+#. module: livestream_instagram
+#: model:ir.model,name:livestream_instagram.model_livestream_session
+msgid "Livestream Session"
+msgstr ""
+
+#. module: livestream_instagram
+#: model:ir.model,name:livestream_instagram.model_livestream_webhook_event
+msgid "Livestream Webhook Event"
+msgstr ""
+
+#. module: livestream_instagram
+#: model:ir.actions.server,name:livestream_instagram.ir_cron_ig_sync_ir_actions_server
+msgid "Livestream: Sync Instagram lives and comments"
+msgstr "Livestream: Đồng bộ live và bình luận Instagram"
+
+#. module: livestream_instagram
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_account__platform
+msgid "Platform"
+msgstr "Nền tảng"
+
+#. module: livestream_instagram
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_webhook_event__source
+msgid "Source"
+msgstr ""
+
+#. module: livestream_instagram
+#. odoo-python
+#: code:addons/livestream_instagram/models/livestream_account.py:0
+msgid "The 24h Instagram window is closed: wait for %s to write to the shop."
+msgstr "Cửa sổ Instagram 24h đã đóng: chờ %s nhắn tin cho shop."

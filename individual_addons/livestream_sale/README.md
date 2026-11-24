@@ -7,6 +7,7 @@ Bộ 3 module cho Odoo 20:
 | `livestream_sale` | Lõi: phiên live, mã tag, bình luận, chat (Discuss), đơn hàng, cọc, khớp tiền, Bảng điều hành 3 cột, bộ giả lập |
 | `livestream_sepay` | Nhận biến động số dư từ SePay (webhook + cron kéo bù 5 phút/lần) |
 | `livestream_facebook` | Bình luận live trên Facebook Page, private reply, Messenger 2 chiều |
+| `livestream_instagram` | Bình luận Instagram Live, private reply trong lúc live, Instagram Direct (qua Page liên kết) |
 
 ## 1. Cài đặt
 
@@ -14,7 +15,7 @@ Bộ 3 module cho Odoo 20:
 cd "/Users/buzz/odoo 20"
 docker compose up -d
 # Tạo DB (tên phải bắt đầu bằng odoo20_ vì dbfilter), rồi cài module:
-docker compose run --rm odoo odoo -d odoo20_shop -i livestream_sale,livestream_sepay,livestream_facebook --stop-after-init
+docker compose run --rm odoo odoo -d odoo20_shop -i livestream_sale,livestream_sepay,livestream_facebook,livestream_instagram --stop-after-init
 ```
 
 Phân quyền (Thiết lập › Người dùng › tab Livestream):
@@ -60,6 +61,24 @@ Lưu ý về giới hạn của Meta:
 - Mỗi bình luận chỉ gửi được **1 tin nhắn riêng** (trong 7 ngày). Khách trả lời thì mới mở **cửa sổ 24h**. Bảng điều hành hiển thị trạng thái này.
 - Khi app ở Development mode, chỉ tài khoản có vai trò trong app (Admin/Developer/Tester) mới bình luận và nhắn tin được. Muốn bán thật thì phải qua **App Review**.
 
+## 3b. Instagram Live (qua Facebook Page)
+
+Page Facebook chỉ là cầu nối kỹ thuật, **không cần follower, không cần live trên Facebook**. Buổi live và người bình luận đều ở Instagram.
+
+1. Tài khoản Instagram phải là **Business/Creator**, để **công khai**, và **liên kết với Page** (Instagram › Cài đặt › Tài khoản đã liên kết, hoặc Meta Business Suite).
+2. Trong Meta App (cùng app với Facebook): thêm quyền `instagram_basic`, `instagram_manage_comments`, `instagram_manage_messages`, `pages_messaging`, `pages_read_engagement`, `pages_manage_metadata`, `pages_show_list`. `live_comments` cần **Advanced Access**, nên khi chạy thật phải đưa vào App Review.
+3. Webhooks › object **Instagram**: Callback URL lấy ở ô **Ig Webhook Url** trên tài khoản kết nối, dùng cùng Verify Token. Đăng ký field `live_comments` và `messages`.
+4. **Livestream › Cấu hình › Tài khoản kết nối › Tạo mới**:
+   - Nền tảng *Instagram*.
+   - External ID = **ID tài khoản Instagram Business** (`GET /{page-id}?fields=instagram_business_account`).
+   - Linked Facebook Page ID = ID của Page.
+   - Access Token = Page token. Nhập App Secret.
+5. Bắt đầu live trên app Instagram (hoặc Live Producer). Trong vòng 1 phút, cron sẽ tự tạo phiên live (badge **IG**). Bạn nhập **mã tag → sản phẩm** cho phiên này. Bình luận đổ về bảng điều hành như Facebook.
+
+Lưu ý riêng của Instagram:
+- **Chỉ nhắn riêng (private reply) được trong lúc đang live.** Live tắt thì chỉ nhắn được cho khách đã nhắn Direct cho shop trong 24h qua. Màn hình có dòng nhắc màu đỏ.
+- Mỗi tin tối đa 1000 byte, tin dài được tự tách. Ảnh QR được tải lên Meta rồi gửi kèm.
+
 ## 4. Chạy local: cần tunnel để nhận webhook
 
 Meta và SePay không gọi được vào `localhost`. Có hai cách:
@@ -101,6 +120,6 @@ Page có thể nối cùng lúc với Pancake và app của shop: cả hai đề
 ## 8. Chạy test tự động
 
 ```bash
-docker compose run --rm odoo odoo -d odoo20_lstest -i livestream_sale,livestream_sepay,livestream_facebook \
-  --test-enable --test-tags /livestream_sale,/livestream_sepay,/livestream_facebook --stop-after-init --no-http
+docker compose run --rm odoo odoo -d odoo20_lstest -i livestream_sale,livestream_sepay,livestream_facebook,livestream_instagram \
+  --test-enable --test-tags /livestream_sale,/livestream_sepay,/livestream_facebook,/livestream_instagram --stop-after-init --no-http
 ```

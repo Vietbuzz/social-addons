@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20261112\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 23:52+0000\n"
-"PO-Revision-Date: 2026-11-22 23:52+0000\n"
+"POT-Creation-Date: 2026-11-24 12:20+0000\n"
+"PO-Revision-Date: 2026-11-24 12:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -26,6 +26,13 @@ msgstr "(thủ công)"
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 msgid "+ Add product by tag…"
 msgstr "+ Thêm sản phẩm theo mã tag…"
+
+#. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/livestream_comment.py:0
+msgid ""
+"A deposit is required; only a manager can create an order without deposit."
+msgstr ""
 
 #. module: livestream_sale
 #: model:ir.model.constraint,message:livestream_sale.constraint_livestream_session_tag_session_code_uniq
@@ -101,9 +108,23 @@ msgid "Attachment Count"
 msgstr ""
 
 #. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/discuss_channel.py:0
+msgid ""
+"Attachments (QR image) were not delivered: a private reply can only carry "
+"text. Send them again once the customer replies."
+msgstr ""
+
+#. module: livestream_sale
 #: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_bank_transaction__match_method__auto
 msgid "Automatic"
 msgstr "Tự động"
+
+#. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/livestream_bank_transaction.py:0
+msgid "Automatic matching failed: %s"
+msgstr ""
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_customer__avatar_url
@@ -170,6 +191,8 @@ msgid ""
 msgstr ""
 "Chat là riêng tư và chỉ giữa 2 người. Nhóm là riêng tư cho một nhóm người "
 "được mời. Kênh có thể tham dự tự do (tùy theo cấu hình)."
+"Chat là riêng tư và chỉ giữa 2 người. Nhóm là riêng tư cho một nhóm người "
+"được mời. Kênh có thể tham dự tự do (tùy theo cấu hình)."
 
 #. module: livestream_sale
 #. odoo-javascript
@@ -203,6 +226,12 @@ msgstr "Bình luận"
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_comment__comment_time
 msgid "Comment Time"
 msgstr "Thời gian bình luận"
+
+#. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/livestream_comment.py:0
+msgid "Comment already has order %s."
+msgstr ""
 
 #. module: livestream_sale
 #. odoo-python
@@ -350,6 +379,12 @@ msgstr "Danh tính khách đã tồn tại."
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 msgid "Customer order"
 msgstr "Đơn của khách"
+
+#. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/livestream_simulator.py:0
+msgid "Customer replies can only be simulated on simulator accounts."
+msgstr ""
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_bank_transaction__date
@@ -539,6 +574,12 @@ msgstr "Tiền chuyển khoản đến"
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 msgid "Incoming transfers"
 msgstr "Biến động số dư"
+
+#. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid "Instagram: private replies only work while the live is running."
+msgstr "Instagram: chỉ nhắn riêng được trong lúc đang live."
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_bank_transaction__message_is_follower
@@ -808,6 +849,12 @@ msgid "No transfers yet."
 msgstr "Chưa có giao dịch."
 
 #. module: livestream_sale
+#: model:ir.model.fields,field_description:livestream_sale.field_res_partner__livestream_phone_norm
+#: model:ir.model.fields,field_description:livestream_sale.field_res_users__livestream_phone_norm
+msgid "Normalized Phone"
+msgstr ""
+
+#. module: livestream_sale
 #. odoo-python
 #: code:addons/livestream_sale/models/livestream_simulator.py:0
 msgid "Not a livestream conversation."
@@ -840,6 +887,13 @@ msgstr ""
 #: model:ir.model.fields,help:livestream_sale.field_livestream_bank_transaction__message_has_error_counter
 #: model:ir.model.fields,help:livestream_sale.field_livestream_session__message_has_error_counter
 msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/sale_order.py:0
+msgid ""
+"Only a livestream manager can change the deposit of a livestream order."
 msgstr ""
 
 #. module: livestream_sale
@@ -1041,6 +1095,8 @@ msgid ""
 "Provider receiving bank transfers for deposits; its journal's bank account "
 "is used for VietQR."
 msgstr "Nhà cung cấp nhận tiền chuyển khoản cọc; tài khoản ngân hàng của sổ nhật ký được dùng để tạo VietQR."
+"Nhà cung cấp nhận tiền chuyển khoản cọc; tài khoản ngân hàng của sổ nhật ký "
+"được dùng để tạo VietQR."
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_comment__quantity
@@ -1062,6 +1118,11 @@ msgstr "Lý do"
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 msgid "Reply"
 msgstr "Trả lời"
+
+#. module: livestream_sale
+#: model_terms:ir.ui.view,arch_db:livestream_sale.livestream_webhook_event_view_list
+msgid "Retry"
+msgstr ""
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_bank_transaction__message_has_sms_error
@@ -1163,6 +1224,12 @@ msgstr "Tin nhắn giả lập của khách"
 #: code:addons/livestream_sale/static/src/console/bank_feed.js:0
 msgid "Simulated transfer amount (VND)"
 msgstr "Số tiền chuyển giả lập (VND)"
+
+#. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/livestream_simulator.py:0
+msgid "Simulated transfers are refused on a live payment provider."
+msgstr ""
 
 #. module: livestream_sale
 #: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_account__platform__simulator
@@ -1374,6 +1441,12 @@ msgstr "VD: Live 22/11 - BST thu đông"
 #: model_terms:ir.ui.view,arch_db:livestream_sale.livestream_account_view_form
 msgid "e.g. My Shop Page"
 msgstr "VD: Page shop của tôi"
+
+#. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid "to match"
+msgstr ""
 
 #. module: livestream_sale
 #. odoo-javascript
