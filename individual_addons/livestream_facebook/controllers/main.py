@@ -9,6 +9,14 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 
+def verify_meta_signature(body, header, secret):
+    """Meta webhooks: X-Hub-Signature-256 = 'sha256=' + HMAC-SHA256(app secret, raw body)."""
+    if not secret:
+        return False
+    expected = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest((header or "").encode(), expected.encode())
+
+
 class FacebookWebhookController(http.Controller):
     @http.route("/livestream/facebook/webhook", type="http", auth="public", methods=["GET"],
                 csrf=False, save_session=False)
@@ -34,9 +42,7 @@ class FacebookWebhookController(http.Controller):
         accepted = []
         for entry in payload.get("entry", []):
             account = Account.search([("platform", "=", "facebook"), ("external_id", "=", str(entry.get("id")))], limit=1)
-            secret = account.fb_app_secret if account else None
-            expected = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest() if secret else None
-            if not expected or not hmac.compare_digest(signature.encode(), expected.encode()):
+            if not verify_meta_signature(body, signature, account.fb_app_secret if account else None):
                 _logger.warning("Rejected Facebook webhook for page %s (bad signature)", entry.get("id"))
                 return request.make_response("Forbidden", status=403)
             accepted.append((account, entry))

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="livestream_account_view_form_instagram" model="ir.ui.view">
+        <field name="name">livestream.account.form.instagram</field>
+        <field name="model">livestream.account</field>
+        <field name="inherit_id" ref="livestream_facebook.livestream_account_view_form_facebook"/>
+        <field name="arch" type="xml">
+            <group name="meta_app" position="attributes">
+                <attribute name="invisible">platform not in ('facebook', 'instagram')</attribute>
+            </group>
+            <field name="fb_webhook_url" position="attributes">
+                <attribute name="invisible">platform != 'facebook'</attribute>
+            </field>
+            <field name="fb_webhook_url" position="after">
+                <field name="ig_webhook_url" widget="CopyClipboardChar" invisible="platform != 'instagram'"/>
+                <field name="fb_page_id" invisible="platform != 'instagram'" required="platform == 'instagram'"/>
+            </field>
+        </field>
+    </record>
+</odoo>

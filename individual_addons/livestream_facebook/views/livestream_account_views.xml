@@ -10,7 +10,7 @@
                 <button name="action_fb_sync_live_videos" type="object" string="Sync live videos" invisible="platform != 'facebook'"/>
             </header>
             <group name="main" position="after">
-                <group string="Meta App" invisible="platform != 'facebook'">
+                <group string="Meta App" name="meta_app" invisible="platform != 'facebook'">
                     <group>
                         <field name="fb_app_id"/>
                         <field name="fb_app_secret" password="True"/>
