@@ -8,6 +8,9 @@
             <group name="meta_app" position="attributes">
                 <attribute name="invisible">platform not in ('facebook', 'instagram')</attribute>
             </group>
+            <button name="action_fb_subscribe" position="attributes">
+                <attribute name="invisible">platform not in ('facebook', 'instagram')</attribute>
+            </button>
             <field name="fb_webhook_url" position="attributes">
                 <attribute name="invisible">platform != 'facebook'</attribute>
             </field>

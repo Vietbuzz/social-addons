@@ -45,8 +45,9 @@ class TestInstagramCron(InstagramCommon):
     def test_cron_ends_missing_live(self):
         with patch.object(graph_api, "_request", side_effect=fake_graph(["MEDIA5"], [])):
             self.env["livestream.session"]._ig_cron_sync()
-        with patch.object(graph_api, "_request", side_effect=fake_graph([], [])):
-            self.env["livestream.session"]._ig_cron_sync()
+        for _i in range(2):  # two consecutive misses end the live
+            with patch.object(graph_api, "_request", side_effect=fake_graph([], [])):
+                self.env["livestream.session"]._ig_cron_sync()
         self.assertEqual(self._sessions().state, "ended")
 
     def test_cron_bad_row_does_not_lose_batch(self):

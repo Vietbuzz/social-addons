@@ -48,7 +48,10 @@ class LivestreamWebhookEvent(models.Model):
     def _ig_event(self, account, event):
         message = event.get("message")
         sender = (event.get("sender") or {}).get("id")
-        if not message or not sender or message.get("is_echo") or message.get("is_self") or sender == account.external_id:
+        if (
+            not message or not sender or sender == account.external_id
+            or any(message.get(flag) for flag in ("is_echo", "is_self", "is_deleted", "is_unsupported"))
+        ):
             return
         customer = self._ig_customer_for_igsid(account, sender)
         files = []
@@ -87,7 +90,8 @@ class LivestreamWebhookEvent(models.Model):
                 return pending
         return Customer.create({
             "account_id": account.id,
-            "external_user_id": f"igsid:{igsid}",
+            # the IGSID equals the live commenter id: a later comment must find this same customer
+            "external_user_id": igsid,
             "psid": igsid,
             "name": username or profile.get("name") or "Instagram user",
         })
