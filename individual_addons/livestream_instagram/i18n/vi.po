@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20261112\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 06:28+0000\n"
-"PO-Revision-Date: 2026-11-25 06:28+0000\n"
+"POT-Creation-Date: 2026-11-25 07:23+0000\n"
+"PO-Revision-Date: 2026-11-25 07:23+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -30,7 +30,13 @@ msgid ""
 msgstr ""
 
 #. module: livestream_instagram
+#: model:ir.model,name:livestream_instagram.model_livestream_meta_connect_wizard
+msgid "Connect Facebook Pages"
+msgstr "Kết nối Page Facebook"
+
+#. module: livestream_instagram
 #: model:ir.model.fields,field_description:livestream_instagram.field_livestream_account__display_name
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_meta_connect_wizard__display_name
 #: model:ir.model.fields,field_description:livestream_instagram.field_livestream_session__display_name
 #: model:ir.model.fields,field_description:livestream_instagram.field_livestream_webhook_event__display_name
 msgid "Display Name"
@@ -38,6 +44,7 @@ msgstr "Tên hiển thị"
 
 #. module: livestream_instagram
 #: model:ir.model.fields,field_description:livestream_instagram.field_livestream_account__id
+#: model:ir.model.fields,field_description:livestream_instagram.field_livestream_meta_connect_wizard__id
 #: model:ir.model.fields,field_description:livestream_instagram.field_livestream_session__id
 #: model:ir.model.fields,field_description:livestream_instagram.field_livestream_webhook_event__id
 msgid "ID"
@@ -90,6 +97,7 @@ msgid ""
 "Instagram via Facebook Login: messages and private replies go through the "
 "linked Page."
 msgstr "Instagram qua Facebook Login: tin nhắn và nhắn riêng đi qua Page liên kết."
+"Instagram qua Facebook Login: tin nhắn và nhắn riêng đi qua Page liên kết."
 "Instagram qua Facebook Login: tin nhắn và nhắn riêng đi qua Page liên kết."
 
 #. module: livestream_instagram

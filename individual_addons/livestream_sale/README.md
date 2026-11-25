@@ -61,6 +61,20 @@ Lưu ý về giới hạn của Meta:
 - Mỗi bình luận chỉ gửi được **1 tin nhắn riêng** (trong 7 ngày). Khách trả lời thì mới mở **cửa sổ 24h**. Bảng điều hành hiển thị trạng thái này.
 - Khi app ở Development mode, chỉ tài khoản có vai trò trong app (Admin/Developer/Tester) mới bình luận và nhắn tin được. Muốn bán thật thì phải qua **App Review**.
 
+## 3a. Kết nối với Facebook (khuyến nghị, thay cho dán token)
+
+1. Trong Meta App › **Facebook Login** › Settings › **Valid OAuth Redirect URIs**, thêm `https://<URL tunnel hoặc domain>/livestream/facebook/oauth/callback`. URL này phải trùng với tham số `web.base.url` của Odoo. Tunnel nhanh `trycloudflare.com` đổi URL mỗi lần chạy, nên mỗi lần đổi phải cập nhật lại cả hai chỗ.
+2. Tạo một tài khoản kết nối (Facebook hoặc Instagram), nhập **App ID** và **App Secret**, rồi bấm **"Kết nối với Facebook"**.
+3. Đăng nhập Facebook và đồng ý cấp quyền. Odoo hiện danh sách Page bạn quản lý (kèm Instagram liên kết, nếu có). Tick các Page cần dùng rồi bấm **"Kết nối các Page đã chọn"**.
+4. Odoo tự tạo hoặc cập nhật tài khoản Facebook và Instagram với **Page token dài hạn**. Page token loại này không hết hạn theo thời gian, nhưng sẽ mất hiệu lực nếu người kết nối đổi mật khẩu, bị gỡ quyền quản trị Page, hoặc thu hồi quyền của app.
+5. Bấm **"Đăng ký webhook cho Page"** trên từng tài khoản.
+
+Odoo kiểm tra token **mỗi giờ**. Khi token mất hiệu lực:
+- tài khoản chuyển sang trạng thái đỏ **"Cần kết nối lại"**;
+- màn hình điều hành hiện dải cảnh báo đỏ.
+
+Lúc đó chỉ cần bấm lại "Kết nối với Facebook". Muốn kiểm tra ngay thì bấm **"Kiểm tra token"**. Ô Access Token vẫn nhập tay được, ví dụ để dán System User token từ Business Manager.
+
 ## 3b. Instagram Live (qua Facebook Page)
 
 Page Facebook chỉ là cầu nối kỹ thuật, **không cần follower, không cần live trên Facebook**. Buổi live và người bình luận đều ở Instagram.

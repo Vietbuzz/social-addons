@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20261112\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 06:28+0000\n"
-"PO-Revision-Date: 2026-11-25 06:28+0000\n"
+"POT-Creation-Date: 2026-11-25 07:23+0000\n"
+"PO-Revision-Date: 2026-11-25 07:23+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -32,6 +32,19 @@ msgstr "+ Thêm sản phẩm theo mã tag…"
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 msgid "+ Search any product (name / code)…"
 msgstr "+ Tìm sản phẩm bất kỳ (tên / mã)…"
+
+#. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid ""
+": connection lost, comments and messages are not received. Reconnect it in "
+"Configuration › Connected Accounts."
+msgstr ""
+
+#. module: livestream_sale
+#: model_terms:ir.ui.view,arch_db:livestream_sale.livestream_account_view_form
+msgid "<strong>Needs reconnection:</strong>"
+msgstr ""
 
 #. module: livestream_sale
 #. odoo-python
@@ -134,6 +147,11 @@ msgid ""
 msgstr ""
 
 #. module: livestream_sale
+#: model:ir.model.fields,field_description:livestream_sale.field_livestream_webhook_event__attempts
+msgid "Attempts"
+msgstr ""
+
+#. module: livestream_sale
 #: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_bank_transaction__match_method__auto
 msgid "Automatic"
 msgstr "Tự động"
@@ -207,6 +225,8 @@ msgid ""
 "Chat is private and unique between 2 persons. Group is private among invited"
 " persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
+"Chat là riêng tư và chỉ giữa 2 người. Nhóm là riêng tư cho một nhóm người "
+"được mời. Kênh có thể tham dự tự do (tùy theo cấu hình)."
 "Chat là riêng tư và chỉ giữa 2 người. Nhóm là riêng tư cho một nhóm người "
 "được mời. Kênh có thể tham dự tự do (tùy theo cấu hình)."
 "Chat là riêng tư và chỉ giữa 2 người. Nhóm là riêng tư cho một nhóm người "
@@ -830,6 +850,11 @@ msgid "Name"
 msgstr "Tên"
 
 #. module: livestream_sale
+#: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_account__token_state__invalid
+msgid "Needs reconnection"
+msgstr "Cần kết nối lại"
+
+#. module: livestream_sale
 #: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_comment__state__new
 #: model_terms:ir.ui.view,arch_db:livestream_sale.livestream_comment_view_search
 msgid "New"
@@ -887,6 +912,11 @@ msgstr ""
 #: code:addons/livestream_sale/models/livestream_simulator.py:0
 msgid "Not a livestream conversation."
 msgstr "Không phải hội thoại livestream."
+
+#. module: livestream_sale
+#: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_account__token_state__unknown
+msgid "Not checked"
+msgstr "Chưa kiểm tra"
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_session_tag__note
@@ -1161,6 +1191,8 @@ msgstr "Nhà cung cấp nhận tiền chuyển khoản cọc; tài khoản ngân
 "được dùng để tạo VietQR."
 "Nhà cung cấp nhận tiền chuyển khoản cọc; tài khoản ngân hàng của sổ nhật ký "
 "được dùng để tạo VietQR."
+"Nhà cung cấp nhận tiền chuyển khoản cọc; tài khoản ngân hàng của sổ nhật ký "
+"được dùng để tạo VietQR."
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_comment__quantity
@@ -1386,6 +1418,21 @@ msgid "This transaction is not matched."
 msgstr "Giao dịch này chưa được khớp."
 
 #. module: livestream_sale
+#: model:ir.model.fields,field_description:livestream_sale.field_livestream_account__token_checked_at
+msgid "Token Checked At"
+msgstr "Kiểm tra token lúc"
+
+#. module: livestream_sale
+#: model:ir.model.fields,field_description:livestream_sale.field_livestream_account__token_error
+msgid "Token Error"
+msgstr "Lỗi token"
+
+#. module: livestream_sale
+#: model:ir.model.fields,field_description:livestream_sale.field_livestream_account__token_state
+msgid "Token State"
+msgstr "Trạng thái token"
+
+#. module: livestream_sale
 #. odoo-javascript
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 #: model_terms:ir.ui.view,arch_db:livestream_sale.livestream_bank_transaction_view_list
@@ -1460,6 +1507,11 @@ msgstr "%(user)s gỡ khớp khỏi %(order)s. Lý do: %(reason)s"
 #: code:addons/livestream_sale/models/livestream_webhook_event.py:0
 msgid "Unsupported simulator event kind: %s"
 msgstr ""
+
+#. module: livestream_sale
+#: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_account__token_state__valid
+msgid "Valid"
+msgstr "Hợp lệ"
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_session__external_video_id
