@@ -36,9 +36,12 @@ class LivestreamWebhookEvent(models.Model):
         author = value.get("from") or {}
         if author.get("id") == account.external_id:
             return  # the Page's own comments
-        session = self.env["livestream.session"].sudo()._fb_find_for_post(account, value.get("post_id"))
+        Session = self.env["livestream.session"].sudo()
+        session = Session._fb_find_for_post(account, value.get("post_id"))
         if not session:
-            return  # comment on a regular post
+            session = Session._fb_post_session(account, value.get("post_id"))
+        if session.source_type == "post" and session.state != "live":
+            return  # the shop closed this post
         self.env["livestream.comment"].sudo()._ingest(
             session, value["comment_id"], author.get("id") or f"anon:{value['comment_id']}",
             author.get("name") or "Facebook user", value.get("message", ""),

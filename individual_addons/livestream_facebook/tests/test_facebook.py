@@ -12,50 +12,10 @@ from odoo.tests import HttpCase, tagged
 from odoo.tools import mute_logger
 
 from odoo.addons.livestream_facebook.models import graph_api
-from odoo.addons.livestream_sale.tests.common import LivestreamCommon
-
-PAYLOADS = Path(__file__).parent / "payloads"
-
-
-def raw(name):
-    return (PAYLOADS / name).read_bytes()
-
+from .common import FacebookCommon, raw
 
 @tagged("post_install", "-at_install", "livestream")
-class TestFacebook(LivestreamCommon, HttpCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.fb = cls.env["livestream.account"].create({
-            "name": "FB Page",
-            "platform": "facebook",
-            "external_id": "PAGE1",
-            "access_token": "PAGE_TOKEN",
-            "fb_app_secret": "APPSECRET",
-            "fb_verify_token": "VERIFY",
-            "payment_provider_id": cls.provider.id,
-        })
-        cls.fb_session = cls.env["livestream.session"].create({
-            "name": "FB live", "account_id": cls.fb.id, "state": "live",
-            "external_video_id": "LIVE1", "external_post_id": "PAGE1_VID1",
-            "tag_ids": [fields.Command.create({"code": "69", "product_id": cls.product_shirt.id, "price_unit": 150000})],
-        })
-        cls.Event = cls.env["livestream.webhook.event"]
-        cls.Comment = cls.env["livestream.comment"]
-
-    def _sig(self, body, secret="APPSECRET"):
-        return "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
-
-    def _post(self, body, sig=None):
-        headers = {"Content-Type": "application/json"}
-        if sig is not False:
-            headers["X-Hub-Signature-256"] = sig or self._sig(body)
-        return self.url_open("/livestream/facebook/webhook", data=body, headers=headers)
-
-    def _deliver(self, name):
-        self.assertEqual(self._post(raw(name)).status_code, 200)
-        self.Event._cron_process()
-
+class TestFacebook(FacebookCommon):
     def test_verify_challenge(self):
         ok = self.url_open("/livestream/facebook/webhook?hub.mode=subscribe&hub.verify_token=VERIFY&hub.challenge=12345")
         self.assertEqual((ok.status_code, ok.text), (200, "12345"))
@@ -88,14 +48,6 @@ class TestFacebook(LivestreamCommon, HttpCase):
         self._post(body)
         self.Event._cron_process()
         self.assertFalse(self.Comment.search([("session_id", "=", self.fb_session.id)]))
-
-    def test_comment_on_unknown_post_ignored(self):
-        payload = json.loads(raw("feed_comment.json"))
-        payload["entry"][0]["changes"][0]["value"]["post_id"] = "PAGE1_OTHER"
-        self._post(json.dumps(payload).encode())
-        self.Event._cron_process()
-        self.assertFalse(self.Comment.search([("session_id", "=", self.fb_session.id)]))
-        self.assertEqual(self.Event.search([("source", "=", "facebook")]).state, "done")
 
     def test_private_reply_sets_psid(self):
         self._deliver("feed_comment.json")

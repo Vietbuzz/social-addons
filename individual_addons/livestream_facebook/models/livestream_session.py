@@ -23,6 +23,16 @@ class LivestreamSession(models.Model):
         ], limit=1)
 
     @api.model
+    def _fb_post_session(self, account, post_id):
+        """Regular Page post -> its own session (named after the post text)."""
+        try:
+            info = graph_api._request("GET", post_id, account._fb_token(), params={"fields": "message,permalink_url"})
+        except Exception as e:  # noqa: BLE001 - never lose the comment because the post can't be read
+            _logger.info("Cannot read Facebook post %s: %s", post_id, e)
+            info = {}
+        return self._get_or_create_post(account, post_id, info.get("message"), info.get("permalink_url"))
+
+    @api.model
     def _fb_upsert_live(self, account, live):
         session = self.search([("account_id", "=", account.id), ("external_video_id", "=", live["id"])], limit=1)
         status = (live.get("status") or "").upper()
