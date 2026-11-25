@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20261112\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 12:20+0000\n"
-"PO-Revision-Date: 2026-11-24 12:20+0000\n"
+"POT-Creation-Date: 2026-11-25 06:28+0000\n"
+"PO-Revision-Date: 2026-11-25 06:28+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -26,6 +26,12 @@ msgstr "(thủ công)"
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 msgid "+ Add product by tag…"
 msgstr "+ Thêm sản phẩm theo mã tag…"
+
+#. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid "+ Search any product (name / code)…"
+msgstr "+ Tìm sản phẩm bất kỳ (tên / mã)…"
 
 #. module: livestream_sale
 #. odoo-python
@@ -79,6 +85,18 @@ msgstr "Hãy thêm ít nhất một sản phẩm."
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 msgid "All"
 msgstr "Tất cả"
+
+#. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/livestream_console.py:0
+msgid "All open sources"
+msgstr "Tất cả nguồn đang mở"
+
+#. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid "All sources"
+msgstr "Tất cả nguồn"
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_bank_transaction__amount
@@ -189,6 +207,8 @@ msgid ""
 "Chat is private and unique between 2 persons. Group is private among invited"
 " persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
+"Chat là riêng tư và chỉ giữa 2 người. Nhóm là riêng tư cho một nhóm người "
+"được mời. Kênh có thể tham dự tự do (tùy theo cấu hình)."
 "Chat là riêng tư và chỉ giữa 2 người. Nhóm là riêng tư cho một nhóm người "
 "được mời. Kênh có thể tham dự tự do (tùy theo cấu hình)."
 "Chat là riêng tư và chỉ giữa 2 người. Nhóm là riêng tư cho một nhóm người "
@@ -593,10 +613,9 @@ msgid "Is Livestream"
 msgstr "Đơn livestream"
 
 #. module: livestream_sale
-#. odoo-javascript
-#: code:addons/livestream_sale/static/src/console/console.xml:0
-msgid "LIVE"
-msgstr ""
+#: model:ir.model.fields,field_description:livestream_sale.field_livestream_session__last_comment_at
+msgid "Last Comment"
+msgstr "Bình luận gần nhất"
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_account__write_uid
@@ -623,6 +642,9 @@ msgid "Last Updated on"
 msgstr ""
 
 #. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+#: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_session__source_type__live
 #: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_session__state__live
 msgid "Live"
 msgstr "Đang live"
@@ -838,6 +860,12 @@ msgstr "Chưa có phiên live. Tạo phiên tại Livestream › Phiên live."
 
 #. module: livestream_sale
 #. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console_model.js:0
+msgid "No open source to simulate on."
+msgstr "Không có nguồn đang mở để giả lập."
+
+#. module: livestream_sale
+#. odoo-javascript
 #: code:addons/livestream_sale/static/src/console/console.xml:0
 msgid "No tag"
 msgstr "Không tag"
@@ -938,6 +966,12 @@ msgid "Open & close sale"
 msgstr "Mở hội thoại & Chốt"
 
 #. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid "Open post"
+msgstr "Mở bài viết"
+
+#. module: livestream_sale
 #. odoo-python
 #: code:addons/livestream_sale/models/livestream_session.py:0
 #: model:ir.actions.client,name:livestream_sale.action_livestream_console
@@ -985,6 +1019,12 @@ msgstr "Không tìm thấy đơn."
 #: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_comment__state__ordered
 msgid "Ordered"
 msgstr "Đã lên đơn"
+
+#. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid "POST"
+msgstr "BÀI VIẾT"
 
 #. module: livestream_sale
 #: model:ir.model.fields,help:livestream_sale.field_livestream_account__external_id
@@ -1042,14 +1082,36 @@ msgid "Platform User ID"
 msgstr "ID người dùng trên nền tảng"
 
 #. module: livestream_sale
+#: model:ir.model.fields.selection,name:livestream_sale.selection__livestream_session__source_type__post
+msgid "Post"
+msgstr "Bài viết"
+
+#. module: livestream_sale
+#. odoo-python
+#: code:addons/livestream_sale/models/livestream_session.py:0
+msgid "Post %s"
+msgstr "Bài viết %s"
+
+#. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_session__external_post_id
 msgid "Post ID"
 msgstr ""
 
 #. module: livestream_sale
+#: model:ir.model.fields,field_description:livestream_sale.field_livestream_session__permalink_url
+msgid "Post Link"
+msgstr "Liên kết bài viết"
+
+#. module: livestream_sale
 #: model_terms:ir.ui.view,arch_db:livestream_sale.livestream_account_view_form
 msgid "Post deposits to bank account"
 msgstr "Ghi tiền cọc thẳng vào tài khoản ngân hàng"
+
+#. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid "Posts"
+msgstr "Bài viết"
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_session_tag__price_unit
@@ -1095,6 +1157,8 @@ msgid ""
 "Provider receiving bank transfers for deposits; its journal's bank account "
 "is used for VietQR."
 msgstr "Nhà cung cấp nhận tiền chuyển khoản cọc; tài khoản ngân hàng của sổ nhật ký được dùng để tạo VietQR."
+"Nhà cung cấp nhận tiền chuyển khoản cọc; tài khoản ngân hàng của sổ nhật ký "
+"được dùng để tạo VietQR."
 "Nhà cung cấp nhận tiền chuyển khoản cọc; tài khoản ngân hàng của sổ nhật ký "
 "được dùng để tạo VietQR."
 
@@ -1238,9 +1302,10 @@ msgid "Simulator"
 msgstr "Giả lập"
 
 #. module: livestream_sale
+#: model:ir.model.fields,field_description:livestream_sale.field_livestream_session__source_type
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_webhook_event__source
 msgid "Source"
-msgstr ""
+msgstr "Nguồn"
 
 #. module: livestream_sale
 #: model:ir.model.fields,field_description:livestream_sale.field_livestream_session__date_start
@@ -1463,3 +1528,9 @@ msgid ""
 "·\n"
 "                    paid"
 msgstr "·\n                    đã cọc"
+
+#. module: livestream_sale
+#. odoo-javascript
+#: code:addons/livestream_sale/static/src/console/console.xml:0
+msgid "★ All open sources"
+msgstr "★ Tất cả nguồn đang mở"

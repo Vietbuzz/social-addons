@@ -79,6 +79,23 @@ Lưu ý riêng của Instagram:
 - **Chỉ nhắn riêng (private reply) được trong lúc đang live.** Live tắt thì chỉ nhắn được cho khách đã nhắn Direct cho shop trong 24h qua. Màn hình có dòng nhắc màu đỏ.
 - Mỗi tin tối đa 1000 byte, tin dài được tự tách. Ảnh QR được tải lên Meta rồi gửi kèm.
 
+## 3c. Bình luận bài viết (Facebook + Instagram)
+
+Mỗi bài viết bán hàng được xử lý như một buổi live:
+- Bình luận đầu tiên trên một bài sẽ tự tạo phiên **Bài viết**, đặt tên theo nội dung bài và có liên kết "Mở bài viết".
+- Mã tag là tuỳ chọn, nhập trong form phiên như với live.
+- Trợ lý có thể chốt **bất kỳ sản phẩm nào** bằng ô "Tìm sản phẩm" trong khung đơn.
+
+Cấu hình webhook:
+- **Facebook**: không cần thêm gì, field `feed` của Page đã gửi cả bình luận bài viết.
+- **Instagram**: đăng ký thêm field **`comments`** trong mục Webhooks › Instagram của Meta App.
+
+Trên màn hình điều hành:
+- Mặc định là **"★ Tất cả nguồn đang mở"**, gộp bình luận mới của mọi live và bài viết đang mở.
+- Mỗi bình luận có badge **LIVE / POST** và tên nguồn.
+- Khi chọn xem một nguồn cụ thể, ô chọn nguồn hiện **(+N)** cho các nguồn khác có bình luận mới.
+- Quản lý bấm **Kết thúc** trên phiên bài viết để ngừng nhận bình luận của bài đó. Với khách đã bình luận trước đó, trợ lý vẫn nhắn riêng được trong giới hạn 7 ngày của Meta.
+
 ## 4. Chạy local: cần tunnel để nhận webhook
 
 Meta và SePay không gọi được vào `localhost`. Có hai cách:
