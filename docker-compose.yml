@@ -1,0 +1,25 @@
+name: odoo20
+
+services:
+  odoo:
+    image: odoo:20.0
+    restart: unless-stopped
+    ports:
+      - "8069:8069"
+      - "8072:8072"
+    environment:
+      HOST: host.docker.internal
+      PORT: "54322"
+      USER: odoo
+      PASSWORD: "${PG_PASSWORD:?set PG_PASSWORD in .env}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+      - ./individual_addons:/mnt/extra-addons
+    tty: true
+    stdin_open: true
+
+volumes:
+  odoo-web-data:

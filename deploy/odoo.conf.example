@@ -1,0 +1,20 @@
+[options]
+addons_path = /mnt/extra-addons
+data_dir = /var/lib/odoo
+db_host = db-pg16
+db_port = 5432
+db_user = livestream
+db_password = CHANGE_ME
+db_name = livestream20
+dbfilter = ^livestream20$
+list_db = False
+admin_passwd = CHANGE_ME
+proxy_mode = True
+http_port = 8069
+gevent_port = 8072
+workers = 2
+max_cron_threads = 1
+limit_time_cpu = 120
+limit_time_real = 240
+without_demo = True
+log_level = info

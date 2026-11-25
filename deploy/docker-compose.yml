@@ -1,0 +1,42 @@
+# Production: tino2 (/root/livestream20). Reuses the host's Traefik and the shared db-pg16 (role/DB "livestream").
+name: livestream20
+
+services:
+  odoo:
+    # exact image the test suite ran against (odoo:20.0 built 2026-11-20)
+    image: odoo:20.0@sha256:c7352c766b245b3c0e5c7b7a57e7660dde3265872be9566870d44bdb974f44cf
+    restart: always
+    command: ["odoo", "-c", "/etc/odoo/odoo.conf"]
+    volumes:
+      - ./social-addons/individual_addons:/mnt/extra-addons:ro
+      - ./etc:/etc/odoo:ro
+      - data:/var/lib/odoo
+    networks:
+      - root_default
+      - traefik_web
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=root_default
+      - traefik.http.routers.livestream20.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.livestream20.entrypoints=web,websecure
+      - traefik.http.routers.livestream20.tls=true
+      - traefik.http.routers.livestream20.tls.certresolver=mytlschallenge
+      - traefik.http.routers.livestream20.service=livestream20
+      - traefik.http.services.livestream20.loadbalancer.server.port=8069
+      # real-time bus (workers > 0 serve /websocket on the gevent port)
+      - traefik.http.routers.livestream20-ws.rule=Host(`${DOMAIN}`) && PathPrefix(`/websocket`)
+      - traefik.http.routers.livestream20-ws.entrypoints=web,websecure
+      - traefik.http.routers.livestream20-ws.tls=true
+      - traefik.http.routers.livestream20-ws.tls.certresolver=mytlschallenge
+      - traefik.http.routers.livestream20-ws.priority=100
+      - traefik.http.routers.livestream20-ws.service=livestream20-ws
+      - traefik.http.services.livestream20-ws.loadbalancer.server.port=8072
+
+volumes:
+  data:
+
+networks:
+  root_default:
+    external: true
+  traefik_web:
+    external: true

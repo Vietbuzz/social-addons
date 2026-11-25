@@ -1,0 +1,37 @@
+[options]
+; Odoo 20 chạy trong Docker.
+; Module tự viết: thư mục individual_addons (mount tại /mnt/extra-addons).
+; Addon community của image nằm trong package odoo, server tự nhận.
+; ./addons chỉ là symlink sang nguồn cắt gọn để đọc code, không mount vào container
+; (tránh trùng tên module với bản trong image).
+addons_path = /mnt/extra-addons
+data_dir = /var/lib/odoo
+
+; Postgres có sẵn của TBYB Odoo 20: container todoo20-pg, cổng 54322.
+; Bản Odoo 18 / TBYB 19 dùng postgres:15 cổng 54321 — Odoo 20 cần PostgreSQL >= 16.
+; Container truy cập Postgres trên máy host qua host.docker.internal.
+db_host = host.docker.internal
+db_port = 54322
+db_user = odoo
+db_password = CHANGE_ME
+; Chỉ hiện DB tạo cho môi trường này, không đụng DB TBYB (tbyb20_*) trên cùng server.
+; Webhook Meta không gửi cookie chọn DB. Siết đúng odoo20_livestream để callback
+; /livestream/facebook/webhook khỏi rơi vào màn chọn database.
+; odoo20_lstest tạm không hiện trên selector cho đến khi nới lại bộ lọc.
+dbfilter = ^odoo20_livestream$
+
+; Mật khẩu master trên màn hình quản lý database
+admin_passwd = CHANGE_ME
+
+http_interface = 0.0.0.0
+http_port = 8069
+gevent_port = 8072
+
+list_db = True
+workers = 0
+max_cron_threads = 1
+; True khi đứng sau tunnel Cloudflare (X-Forwarded-Proto / Host).
+proxy_mode = True
+
+log_level = info
+without_demo = True
