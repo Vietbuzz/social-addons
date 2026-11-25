@@ -39,7 +39,7 @@ class LivestreamWebhookEvent(models.Model):
         Session = self.env["livestream.session"].sudo()
         session = Session._fb_find_for_post(account, value.get("post_id"))
         if not session:
-            session = Session._fb_post_session(account, value.get("post_id"))
+            session = Session._fb_post_session(account, value.get("post_id"), (value.get("post") or {}).get("status_type"))
         if session.source_type == "post" and session.state != "live":
             return  # the shop closed this post
         self.env["livestream.comment"].sudo()._ingest(

@@ -1,7 +1,9 @@
 import logging
 
 from odoo import api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+
+MAX_ATTEMPTS = 3
 
 _logger = logging.getLogger(__name__)
 
@@ -25,6 +27,7 @@ class LivestreamWebhookEvent(models.Model):
         default="pending", required=True, index=True,
     )
     error = fields.Text()
+    attempts = fields.Integer(default=0)
     account_id = fields.Many2one("livestream.account", ondelete="set null", index=True)
     company_id = fields.Many2one("res.company", default=lambda self: self.env.company, index=True)
 
@@ -48,9 +51,15 @@ class LivestreamWebhookEvent(models.Model):
                     handler = getattr(event, f"_process_{event.source}")
                     handler(event.payload)
                 event.write({"state": "done", "error": False})
-            except Exception as e:  # noqa: BLE001 - one bad event must not block the queue
+            except (UserError, ValidationError) as e:  # permanent: bad data, no retry
                 _logger.warning("Livestream event %s failed: %s", event.id, e)
-                event.write({"state": "error", "error": str(e)})
+                event.write({"state": "error", "error": str(e), "attempts": event.attempts + 1})
+            except Exception as e:  # noqa: BLE001 - transient (e.g. serialization): retry on next runs
+                attempts = event.attempts + 1
+                _logger.warning("Livestream event %s failed (attempt %s): %s", event.id, attempts, e)
+                event.write({
+                    "state": "pending" if attempts < MAX_ATTEMPTS else "error", "error": str(e), "attempts": attempts,
+                })
 
     def action_retry(self):
         self.filtered(lambda e: e.state == "error").write({"state": "pending", "error": False})

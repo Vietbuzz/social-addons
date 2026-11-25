@@ -20,11 +20,33 @@ class LivestreamSession(models.Model):
             ("external_post_id", "=", post_id),
             ("external_post_id", "=", short),
             ("external_video_id", "=", short),
-        ], limit=1)
+        ], order="source_type, id desc", limit=1)  # 'live' sorts before 'post'
 
     @api.model
-    def _fb_post_session(self, account, post_id):
-        """Regular Page post -> its own session (named after the post text)."""
+    def _fb_live_for_video(self, account, video_id):
+        """Find the Page's live video whose underlying video is `video_id` (comments arrive before any sync)."""
+        try:
+            res = graph_api._request("GET", f"{account.external_id}/live_videos", account._fb_token(), params={
+                "fields": "id,status,title,video{id},creation_time", "limit": 10,
+            })
+        except Exception as e:  # noqa: BLE001
+            _logger.info("Cannot list live videos of %s: %s", account.external_id, e)
+            return None
+        for live in res.get("data", []):
+            if (live.get("video") or {}).get("id") == video_id:
+                return live
+        return None
+
+    @api.model
+    def _fb_post_session(self, account, post_id, status_type=None):
+        """Regular Page post -> its own session (named after the post text).
+
+        A video post may be a running live that was never synced: resolve it first.
+        """
+        if status_type in (None, "added_video"):
+            live = self._fb_live_for_video(account, (post_id or "").split("_")[-1])
+            if live:
+                return self._fb_upsert_live(account, live)
         try:
             info = graph_api._request("GET", post_id, account._fb_token(), params={"fields": "message,permalink_url"})
         except Exception as e:  # noqa: BLE001 - never lose the comment because the post can't be read
@@ -44,20 +66,51 @@ class LivestreamSession(models.Model):
             state = "ended"
         vals = {"state": state}
         video_id = (live.get("video") or {}).get("id")
+        if not video_id and not (session and session.external_post_id):
+            try:  # live_videos webhooks carry only {id, status}
+                info = graph_api._request("GET", live["id"], account._fb_token(), params={"fields": "video{id},title"})
+                video_id = (info.get("video") or {}).get("id")
+                live = {**live, "title": live.get("title") or info.get("title")}
+            except Exception as e:  # noqa: BLE001
+                _logger.info("Cannot read live video %s: %s", live.get("id"), e)
         if video_id:
             vals["external_post_id"] = f"{account.external_id}_{video_id}"
         if session:
             # never reopen an ended live (late/out-of-order events); draft -> live is allowed
             if session.state != state and session.state != "ended":
                 session.write(vals)
+            elif vals.get("external_post_id") and not session.external_post_id:
+                session.external_post_id = vals["external_post_id"]
+            session._fb_absorb_post_sessions()
             return session
-        return self.create({
+        session = self.create({
             **vals,
             "name": live.get("title") or self.env._("Facebook live %s", live["id"]),
             "account_id": account.id,
             "external_video_id": live["id"],
             "date_start": graph_api.parse_time(live.get("creation_time")) if live.get("creation_time") else fields.Datetime.now(),
         })
+        session._fb_absorb_post_sessions()
+        return session
+
+    def _fb_absorb_post_sessions(self):
+        """Comments that arrived as a 'post' before the live was known move into the live session."""
+        self.ensure_one()
+        if self.source_type != "live" or not self.external_post_id:
+            return
+        posts = self.search([
+            ("account_id", "=", self.account_id.id), ("source_type", "=", "post"),
+            ("external_post_id", "=", self.external_post_id), ("id", "!=", self.id),
+        ])
+        for post in posts:
+            existing = set(self.env["livestream.comment"].search([("session_id", "=", self.id)]).mapped("external_id"))
+            for comment in post.env["livestream.comment"].search([("session_id", "=", post.id)]):
+                if comment.external_id in existing:
+                    comment.unlink()
+                else:
+                    comment.session_id = self
+            self.env["sale.order"].search([("livestream_session_id", "=", post.id)]).livestream_session_id = self
+            post.write({"state": "ended", "date_end": fields.Datetime.now()})
 
     @api.model
     def _fb_cron_pull_comments(self):

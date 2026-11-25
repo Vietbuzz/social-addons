@@ -89,13 +89,13 @@ class LivestreamConsole(models.AbstractModel):
         } for t in session.tag_ids]
 
     @api.model
-    def search_products(self, query, limit=20):
+    def search_products(self, query, limit=20, company_id=None):
         query = (query or "").strip()
         if len(query) < 2:
             return []
         products = self.env["product.product"].search([
             ("sale_ok", "=", True),
-            ("company_id", "in", [False, self.env.company.id]),
+            ("company_id", "in", [False, company_id or self.env.company.id]),
             "|", "|", ("name", "ilike", query), ("default_code", "ilike", query), ("barcode", "=", query),
         ], limit=limit)
         return [{

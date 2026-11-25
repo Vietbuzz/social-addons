@@ -52,7 +52,11 @@ export class ConsoleModel {
     // Loading
     // ------------------------------------------------------------------
     async load(sessionId) {
+        const seq = (this._loadSeq = (this._loadSeq || 0) + 1);
         const data = await this.orm.call("livestream.console", "load", [sessionId || "all"]);
+        if (seq !== this._loadSeq) {
+            return; // a newer source selection is already loading
+        }
         Object.assign(this.state, {
             loaded: true,
             sessions: data.sessions,
@@ -67,7 +71,9 @@ export class ConsoleModel {
             thread: null,
             productResults: [],
         });
-        if (data.session) {
+        if (data.session?.id === "all") {
+            this.state.unseen = {};
+        } else if (data.session) {
             delete this.state.unseen[data.session.id];
         }
     }
@@ -137,6 +143,9 @@ export class ConsoleModel {
             s.session.account_ids.push(payload.account_id); // a new source of a newly active account
         }
         for (const item of payload.items) {
+            if (item.session_state !== "live") {
+                continue; // ended live/post: not part of the open sources
+            }
             this._rememberSession(item);
             if (!this.isAll && item.session_id !== s.session.id) {
                 const known = s.comments.some((c) => c.id === item.id);
@@ -217,6 +226,8 @@ export class ConsoleModel {
     async _loadPanel(commentId) {
         const panel = await this.orm.call("livestream.console", "order_panel", [commentId]);
         this.state.panel = panel;
+        this.state.productResults = [];
+        this._productQuery = "";
         const lines = panel.lines.length
             ? panel.lines.map((l) => ({ ...l }))
             : [];
@@ -264,6 +275,7 @@ export class ConsoleModel {
             });
         }
         this.state.productResults = [];
+        this._productQuery = "";
     }
 
     async searchProducts(query) {
@@ -273,7 +285,10 @@ export class ConsoleModel {
             this.state.productResults = [];
             return;
         }
-        const results = await this.orm.call("livestream.console", "search_products", [q]);
+        const companyId = this.state.panel?.comment?.company_id || false;
+        const results = await this.orm.call("livestream.console", "search_products", [q], {
+            company_id: companyId,
+        });
         if (this._productQuery === q) {
             this.state.productResults = results;
         }
@@ -346,8 +361,9 @@ export class ConsoleModel {
     // Simulator
     // ------------------------------------------------------------------
     async simulateComment() {
+        const open = this.state.sessions.filter((s) => s.state === "live");
         const target = this.isAll
-            ? this.state.sessions.find((s) => s.state === "live")?.id
+            ? (open.find((s) => s.platform === "simulator") || open[0])?.id
             : this.state.session.id;
         if (!target) {
             this.notification.add(_t("No open source to simulate on."), { type: "warning" });
@@ -368,12 +384,14 @@ export class ConsoleModel {
     }
 
     _accountOfPanel() {
-        const sessionId = this.state.panel.comment.session_id;
-        const comment = this.state.comments.find((c) => c.session_id === sessionId);
-        return comment?.account_id || this.state.session.account_ids[0];
+        return this.state.panel.comment.account_id || this.state.session.account_ids[0];
     }
 
     async simulateBank(amount, content) {
+        if (!this.state.panel?.comment && !this.state.session.account_ids?.length) {
+            this.notification.add(_t("No open source to simulate on."), { type: "warning" });
+            return;
+        }
         await this._run(() =>
             this.orm.call("livestream.simulator", "simulate_bank", [
                 this.state.panel?.comment ? this._accountOfPanel() : this.state.session.account_ids[0],

@@ -32,7 +32,6 @@ export class LivestreamConsole extends Component {
             offBank();
         });
         const params = this.props.action.params || {};
-        const context = this.props.action.context || {};
         onWillStart(() => this.model.load(params.session_id || "all"));
     }
 

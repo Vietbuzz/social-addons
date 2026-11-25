@@ -1,7 +1,9 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from odoo import fields
 from odoo.tests import tagged
+from odoo.tools import mute_logger
 
 from .common import LivestreamCommon
 
@@ -79,3 +81,45 @@ class TestPostSessions(LivestreamCommon):
         self.assertEqual([r["product_id"] for r in res], [jacket.id])
         self.assertEqual(res[0]["price_unit"], 250000)
         self.assertEqual(self.Console.search_products("a"), [])  # too short
+
+    def test_last_comment_at_throttled(self):
+        self.Comment._ingest(self.session, "t1", "u1", "A", "69", fields.Datetime.now())
+        first = self.session.last_comment_at
+        self.Comment._ingest(self.session, "t2", "u2", "B", "69", fields.Datetime.now())
+        self.assertEqual(self.session.last_comment_at, first)
+
+    def test_event_transient_error_retried(self):
+        Event = self.env["livestream.webhook.event"]
+        ev = Event._enqueue("simulator", {"kind": "comment", "session_id": self.session.id, "comment_id": "x",
+                                          "user_id": "u", "name": "n", "message": "69"}, self.ls_account)
+        transient = patch.object(type(Event), "_process_simulator", side_effect=RuntimeError("could not serialize"))
+        with transient, mute_logger("odoo.addons.livestream_sale.models.livestream_webhook_event"):
+            ev._process()
+        self.assertEqual((ev.state, ev.attempts), ("pending", 1))
+        with transient, mute_logger("odoo.addons.livestream_sale.models.livestream_webhook_event"):
+            ev._process()
+            ev._process()
+        self.assertEqual((ev.state, ev.attempts), ("error", 3))
+
+    def test_load_all_excludes_other_company(self):
+        other_company = self.env["res.company"].create({"name": "Other Shop"})
+        other_account = self.env["livestream.account"].create({
+            "name": "Other", "platform": "simulator", "external_id": "other", "company_id": other_company.id,
+        })
+        other = self.Session.create({"name": "Other live", "account_id": other_account.id, "state": "live"})
+        self.Comment._ingest(other, "o1", "u9", "Z", "69", fields.Datetime.now())
+        data = self.Console.with_context(allowed_company_ids=[self.company_data["company"].id]).load("all")
+        self.assertNotIn(other.id, [s["id"] for s in data["sessions"]])
+        self.assertNotIn("o1", [c["message"] for c in data["comments"]])
+
+    def test_search_products_uses_given_company(self):
+        other_company = self.env["res.company"].create({"name": "Other Co 2"})
+        self.env["product.product"].create({"name": "Mũ len công ty 2", "company_id": other_company.id})
+        self.env.user.company_ids |= other_company
+        res = self.Console.with_context(allowed_company_ids=[other_company.id, self.company_data["company"].id]) \
+            .search_products("mũ len", company_id=self.company_data["company"].id)
+        self.assertEqual(res, [])
+
+    def test_console_format_has_session_state(self):
+        c = self.Comment._ingest(self.session, "s1", "u1", "A", "69", fields.Datetime.now())
+        self.assertEqual(c._console_format()["session_state"], "live")

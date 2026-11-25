@@ -32,6 +32,7 @@ class LivestreamWebhookEvent(models.Model):
             self._ig_event(account, event)
 
     def _ig_live_comment(self, account, value, time):
+        value = {**value, "comment_id": value.get("comment_id") or value.get("id")}
         author = value.get("from") or {}
         if not value.get("comment_id") or author.get("id") == account.external_id:
             return
@@ -48,6 +49,7 @@ class LivestreamWebhookEvent(models.Model):
         )
 
     def _ig_post_comment(self, account, value, time):
+        value = {**value, "comment_id": value.get("comment_id") or value.get("id")}
         media = value.get("media") or {}
         if (media.get("media_product_type") or "").upper() == "LIVE":
             return self._ig_live_comment(account, value, time)

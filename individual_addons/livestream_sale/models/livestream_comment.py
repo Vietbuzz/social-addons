@@ -57,7 +57,10 @@ class LivestreamComment(models.Model):
             "quantity": qty,
             "comment_time": comment_time,
         })
-        session.sudo().last_comment_at = fields.Datetime.now()
+        now = fields.Datetime.now()
+        # throttled: avoid rewriting the session row (and lock contention) on every comment of a busy live
+        if not session.last_comment_at or (now - session.last_comment_at).total_seconds() > 60:
+            session.sudo().last_comment_at = now
         session.account_id._notify_console("livestream/comment", [comment._console_format()])
         return comment
 
@@ -67,7 +70,9 @@ class LivestreamComment(models.Model):
             "id": self.id,
             "session_id": self.session_id.id,
             "session_name": self.session_id.name,
+            "session_state": self.session_id.state,
             "account_id": self.session_id.account_id.id,
+            "company_id": self.company_id.id,
             "source_type": self.session_id.source_type,
             "platform": self.session_id.platform,
             "customer_id": self.customer_id.id,

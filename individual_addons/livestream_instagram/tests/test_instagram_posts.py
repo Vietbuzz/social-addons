@@ -71,3 +71,11 @@ class TestInstagramPosts(InstagramCommon):
             with patch.object(graph_api, "_request", side_effect=no_live):
                 self.env["livestream.session"]._ig_cron_sync()
         self.assertEqual(self._posts().state, "live")
+
+    def test_ig_comment_id_under_id_key(self):
+        body = json.loads(ig_post_comment())
+        value = body["entry"][0]["changes"][0]["value"]
+        value["id"] = value.pop("comment_id")
+        with patch.object(graph_api, "_request", return_value={"caption": "Bài"}):
+            self._deliver_body(json.dumps(body).encode())
+        self.assertTrue(self.Comment.search([("external_id", "=", "IGP1")]))
