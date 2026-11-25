@@ -13,5 +13,8 @@ Layout on the server (`/root/livestream20`, never committed: `etc/odoo.conf`, `.
 
 - Database: shared container `db-pg16` (project `/root/docker-compose.yml`), own role `livestream` and DB `livestream20`.
 - HTTPS: the host Traefik (resolver `mytlschallenge`) routes `fit2hand.io.vn` → 8069 and `/websocket` → 8072.
-- Update: `./update.sh`. Backup: cron `30 2 * * * /root/livestream20/backup.sh`.
+- Update: `./update.sh`.
+- Backup: systemd timer `livestream20-backup.timer` (02:30 nightly) runs `backup.sh` → `/root/livestream20/backups` (7 days). The host has no cron.
+- Admin login: `cat /root/livestream20/etc/.admin_login` (root only).
+- Odoo 20 binds to 127.0.0.1 by default: keep `http_interface = 0.0.0.0` in `etc/odoo.conf`.
 - Remove completely: `docker compose down -v`, then `DROP DATABASE livestream20; DROP ROLE livestream;`.
