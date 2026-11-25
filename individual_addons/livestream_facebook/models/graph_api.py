@@ -11,6 +11,14 @@ GRAPH_URL = f"https://graph.facebook.com/{GRAPH_VERSION}"
 TIMEOUT = 20
 
 
+class MetaApiError(UserError):
+    """Graph API error, keeping Meta's numeric error code (190 = invalid/expired token)."""
+
+    def __init__(self, message, code=None):
+        super().__init__(message)
+        self.code = code
+
+
 def _request(method, path, token, params=None, json=None, data=None, files=None):
     params = dict(params or {}, access_token=token)
     response = requests.request(
@@ -21,8 +29,8 @@ def _request(method, path, token, params=None, json=None, data=None, files=None)
     except ValueError:
         body = {}
     if response.status_code >= 400 or "error" in body:
-        message = body.get("error", {}).get("message") or response.text[:300]
-        raise UserError(f"Facebook: {message}")
+        error = body.get("error") or {}
+        raise MetaApiError(f"Facebook: {error.get('message') or response.text[:300]}", code=error.get("code"))
     return body
 
 

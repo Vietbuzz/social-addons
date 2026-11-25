@@ -43,6 +43,10 @@ class LivestreamConsole(models.AbstractModel):
             "bank_transactions": [],
             "can_simulate": self._can_simulate(),
             "default_deposit": self.env["ir.config_parameter"].sudo().get_int("livestream_sale.default_deposit_amount"),
+            "token_alerts": [
+                {"account_id": a.id, "name": a.name, "platform": a.platform, "error": a.token_error or ""}
+                for a in self.env["livestream.account"].search([("token_state", "=", "invalid")])
+            ],
         }
         if not session_id or session_id == "all":
             sessions = open_sessions

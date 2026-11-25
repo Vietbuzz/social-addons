@@ -8,6 +8,7 @@
         "security/ir.access.csv",
         "wizard/meta_connect_wizard_views.xml",
         "data/ir_cron.xml",
+        "data/ir_cron_tokens.xml",
         "views/livestream_account_views.xml",
     ],
     "license": "LGPL-3",

@@ -16,7 +16,7 @@ class TestConsole(LivestreamCommon):
 
     def test_console_load_shapes(self):
         data = self.Console.load(self.session.id)
-        self.assertEqual(set(data), {"sessions", "session", "comments", "bank_transactions", "can_simulate", "default_deposit"})
+        self.assertEqual(set(data), {"sessions", "session", "comments", "bank_transactions", "can_simulate", "default_deposit", "token_alerts"})
         self.assertEqual(data["session"]["id"], self.session.id)
         self.assertEqual(data["session"]["account_id"], self.ls_account.id)
         self.assertEqual(data["session"]["tags"][0]["code"], "69")
@@ -69,3 +69,9 @@ class TestConsole(LivestreamCommon):
         self.assertEqual(data["session"]["platform"], "simulator")
         self.assertTrue(all("platform" in s for s in data["sessions"]))
         self.assertEqual(data["comments"][0]["platform"], "simulator")
+
+    def test_console_token_alerts(self):
+        self.assertEqual(self.Console.load("all")["token_alerts"], [])
+        self.ls_account.write({"token_state": "invalid", "token_error": "expired"})
+        alerts = self.Console.load("all")["token_alerts"]
+        self.assertEqual([(a["account_id"], a["name"]) for a in alerts], [(self.ls_account.id, self.ls_account.name)])

@@ -9,6 +9,8 @@
                 <field name="platform"/>
                 <field name="external_id"/>
                 <field name="payment_provider_id"/>
+                <field name="token_state" widget="badge" decoration-success="token_state == 'valid'"
+                       decoration-danger="token_state == 'invalid'"/>
                 <field name="company_id" groups="base.group_multi_company"/>
             </list>
         </field>
@@ -25,12 +27,18 @@
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="alert alert-danger" role="alert" invisible="token_state != 'invalid'">
+                        <strong>Needs reconnection:</strong> <field name="token_error" readonly="1" class="d-inline"/>
+                    </div>
                     <div class="oe_title"><h1><field name="name" placeholder="e.g. My Shop Page"/></h1></div>
                     <group name="main">
                         <group name="connection" string="Connection">
                             <field name="platform"/>
                             <field name="external_id"/>
                             <field name="access_token" password="True"/>
+                            <field name="token_state" widget="badge" decoration-success="token_state == 'valid'"
+                                   decoration-danger="token_state == 'invalid'"/>
+                            <field name="token_checked_at"/>
                         </group>
                         <group name="deposit" string="Deposits">
                             <field name="payment_provider_id"/>

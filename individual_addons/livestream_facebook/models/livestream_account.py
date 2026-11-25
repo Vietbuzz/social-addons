@@ -1,9 +1,12 @@
+import logging
 import secrets
 
-from odoo import fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 from . import graph_api
+
+_logger = logging.getLogger(__name__)
 
 
 class LivestreamAccount(models.Model):
@@ -51,6 +54,51 @@ class LivestreamAccount(models.Model):
             graph_api._request("POST", f"{account.external_id}/subscribed_apps", account._fb_token(), params={
                 "subscribed_fields": "feed,live_videos,messages,messaging_postbacks",
             })
+        return True
+
+    # ------------------------------------------------------------------
+    # Token health
+    # ------------------------------------------------------------------
+    def _check_token_health(self):
+        for account in self.sudo():
+            token = account.access_token
+            if not token:
+                continue
+            vals = {"token_checked_at": fields.Datetime.now()}
+            try:
+                if account.fb_app_id and account.fb_app_secret:
+                    data = graph_api._request(
+                        "GET", "debug_token", f"{account.fb_app_id}|{account.fb_app_secret}",
+                        params={"input_token": token},
+                    ).get("data", {})
+                    if data.get("is_valid"):
+                        vals.update(token_state="valid", token_error=False)
+                    else:
+                        message = (data.get("error") or {}).get("message") or "Token is no longer valid"
+                        vals.update(token_state="invalid", token_error=message[:250])
+                else:
+                    graph_api._request("GET", "me", token, params={"fields": "id"})
+                    vals.update(token_state="valid", token_error=False)
+            except graph_api.MetaApiError as e:
+                if e.code in (190, 102):
+                    vals.update(token_state="invalid", token_error=str(e)[:250])
+                else:
+                    vals["token_error"] = str(e)[:250]
+            except Exception as e:  # noqa: BLE001 - network trouble is not a broken token
+                _logger.warning("Token check failed for account %s: %s", account.id, e)
+                vals["token_error"] = str(e)[:250]
+            account.write(vals)
+
+    @api.model
+    def _cron_check_tokens(self):
+        self.search([
+            ("platform", "in", ("facebook", "instagram")), ("access_token", "!=", False),
+        ])._check_token_health()
+
+    def action_check_token(self):
+        if not self.env.user.has_group("livestream_sale.group_livestream_manager"):
+            raise UserError(self.env._("Only a livestream manager can check tokens."))
+        self._check_token_health()
         return True
 
     def action_fb_sync_live_videos(self):

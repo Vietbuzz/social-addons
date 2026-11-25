@@ -6,6 +6,10 @@
         <field name="inherit_id" ref="livestream_sale.livestream_account_view_form"/>
         <field name="arch" type="xml">
             <header position="inside">
+                <button name="action_meta_connect" type="object" string="Connect with Facebook" class="btn-primary"
+                        invisible="platform not in ('facebook', 'instagram')" groups="livestream_sale.group_livestream_manager"/>
+                <button name="action_check_token" type="object" string="Check token"
+                        invisible="platform not in ('facebook', 'instagram')" groups="livestream_sale.group_livestream_manager"/>
                 <button name="action_fb_subscribe" type="object" string="Subscribe Page webhooks" invisible="platform != 'facebook'"/>
                 <button name="action_fb_sync_live_videos" type="object" string="Sync live videos" invisible="platform != 'facebook'"/>
             </header>

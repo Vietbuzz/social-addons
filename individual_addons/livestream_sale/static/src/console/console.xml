@@ -38,6 +38,12 @@
                     </t>
                 </div>
             </div>
+            <div t-foreach="this.state.tokenAlerts" t-as="alert" t-key="alert.account_id"
+                 class="alert alert-danger rounded-0 mb-0 py-2 px-3 d-flex align-items-center gap-2 o_ls_token_alert">
+                <i class="fa fa-exclamation-triangle"/>
+                <span><strong t-out="alert.name"/>: connection lost, comments and messages are not received. Reconnect it in Configuration › Connected Accounts.</span>
+                <small class="text-muted ms-auto text-truncate" style="max-width: 40%" t-out="alert.error"/>
+            </div>
             <div t-if="!this.state.session" class="p-5 text-center text-muted">
                 <p>No live session yet. Create one under Livestream › Live Sessions.</p>
             </div>

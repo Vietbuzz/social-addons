@@ -63,6 +63,7 @@ export class ConsoleModel {
             session: data.session,
             canSimulate: data.can_simulate,
             defaultDeposit: data.default_deposit,
+            tokenAlerts: data.token_alerts || [],
             comments: data.comments,
             bankTransactions: data.bank_transactions,
             tagFilter: false,
@@ -70,6 +71,7 @@ export class ConsoleModel {
             panel: null,
             thread: null,
             productResults: [],
+            tokenAlerts: [],
         });
         if (data.session?.id === "all") {
             this.state.unseen = {};
