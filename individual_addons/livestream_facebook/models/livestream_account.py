@@ -33,6 +33,19 @@ class LivestreamAccount(models.Model):
     # ------------------------------------------------------------------
     # Setup actions
     # ------------------------------------------------------------------
+    def action_meta_connect(self):
+        """Start Facebook Login to get long-lived Page tokens (Pages + linked Instagram accounts)."""
+        self.ensure_one()
+        if not self.env.user.has_group("livestream_sale.group_livestream_manager"):
+            raise UserError(self.env._("Only a livestream manager can connect Facebook."))
+        return {
+            "type": "ir.actions.act_url",
+            "url": self.env["livestream.meta.oauth"]._authorize_url(self),
+            "target": "self",
+        }
+
+    # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
     def action_fb_subscribe(self):
         for account in self.filtered(lambda a: a.platform == "facebook"):
             graph_api._request("POST", f"{account.external_id}/subscribed_apps", account._fb_token(), params={

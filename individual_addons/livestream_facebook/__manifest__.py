@@ -5,6 +5,8 @@
     "summary": "Facebook Page live comments and Messenger for the livestream console",
     "depends": ["livestream_sale"],
     "data": [
+        "security/ir.access.csv",
+        "wizard/meta_connect_wizard_views.xml",
         "data/ir_cron.xml",
         "views/livestream_account_views.xml",
     ],

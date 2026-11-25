@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="meta_connect_wizard_view_form" model="ir.ui.view">
+        <field name="name">livestream.meta.connect.wizard.form</field>
+        <field name="model">livestream.meta.connect.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Connect Facebook Pages">
+                <p>Choose the Pages to connect. Linked Instagram business accounts are connected with their Page.</p>
+                <field name="source_account_id" invisible="1"/>
+                <field name="line_ids">
+                    <list editable="bottom" create="0" delete="0">
+                        <field name="selected"/>
+                        <field name="name"/>
+                        <field name="page_id"/>
+                        <field name="ig_username"/>
+                        <field name="ig_id" optional="hide"/>
+                    </list>
+                </field>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_meta_connect_wizard" model="ir.actions.act_window">
+        <field name="name">Connect Facebook Pages</field>
+        <field name="res_model">livestream.meta.connect.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+</odoo>
