@@ -22,6 +22,12 @@ class LivestreamAccount(models.Model):
         help="Provider receiving bank transfers for deposits; its journal's bank account is used for VietQR.",
     )
     session_ids = fields.One2many("livestream.session", "account_id")
+    token_state = fields.Selection(
+        [("unknown", "Not checked"), ("valid", "Valid"), ("invalid", "Needs reconnection")],
+        default="unknown", required=True, copy=False,
+    )
+    token_checked_at = fields.Datetime(copy=False, readonly=True)
+    token_error = fields.Char(copy=False, readonly=True)
 
     _platform_external_uniq = models.Constraint(
         "UNIQUE(platform, external_id)", "This account is already connected.",

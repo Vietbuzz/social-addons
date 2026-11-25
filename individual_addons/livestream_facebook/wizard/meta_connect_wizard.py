@@ -26,6 +26,58 @@ class LivestreamMetaConnectWizard(models.TransientModel):
         })
 
 
+    def _shared_values(self):
+        source = self.source_account_id.sudo()
+        return {
+            "fb_app_id": source.fb_app_id,
+            "fb_app_secret": source.fb_app_secret,
+            "company_id": source.company_id.id,
+            "token_state": "valid",
+            "token_checked_at": fields.Datetime.now(),
+            "token_error": False,
+            "active": True,
+        }
+
+    def _upsert_account(self, platform, external_id, values, create_values):
+        Account = self.env["livestream.account"].sudo().with_context(active_test=False)
+        account = Account.search([("platform", "=", platform), ("external_id", "=", external_id)], limit=1)
+        if account:
+            account.write(values)
+        else:
+            account = Account.create({**create_values, **values, "platform": platform, "external_id": external_id})
+        return account
+
+    def _apply_page(self, line):
+        source = self.source_account_id.sudo()
+        return self._upsert_account(
+            "facebook", line.page_id,
+            {**self._shared_values(), "access_token": line.page_token},
+            {"name": line.name, "fb_verify_token": source.fb_verify_token,
+             "payment_provider_id": source.payment_provider_id.id},
+        )
+
+    def _apply_instagram(self, line):
+        """Hook: livestream_instagram connects the linked Instagram account."""
+        return self.env["livestream.account"]
+
+    def action_apply(self):
+        self.ensure_one()
+        accounts = self.env["livestream.account"]
+        for line in self.line_ids.filtered("selected"):
+            accounts |= self._apply_page(line)
+            accounts |= self._apply_instagram(line)
+        self.user_token = False
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Connected Accounts"),
+            "res_model": "livestream.account",
+            "view_mode": "list,form",
+            "views": [(False, "list"), (False, "form")],
+            "domain": [("id", "in", accounts.ids)],
+            "target": "current",
+        }
+
+
 class LivestreamMetaConnectWizardLine(models.TransientModel):
     _name = "livestream.meta.connect.wizard.line"
     _description = "Facebook Page to connect"

@@ -5,6 +5,9 @@
         <field name="model">livestream.meta.connect.wizard</field>
         <field name="arch" type="xml">
             <form string="Connect Facebook Pages">
+                <header>
+                    <button name="action_apply" type="object" string="Connect selected Pages" class="btn-primary"/>
+                </header>
                 <p>Choose the Pages to connect. Linked Instagram business accounts are connected with their Page.</p>
                 <field name="source_account_id" invisible="1"/>
                 <field name="line_ids">
