@@ -57,6 +57,7 @@ class LivestreamComment(models.Model):
             "quantity": qty,
             "comment_time": comment_time,
         })
+        session.sudo().last_comment_at = fields.Datetime.now()
         session.account_id._notify_console("livestream/comment", [comment._console_format()])
         return comment
 
@@ -65,6 +66,8 @@ class LivestreamComment(models.Model):
         return {
             "id": self.id,
             "session_id": self.session_id.id,
+            "session_name": self.session_id.name,
+            "source_type": self.session_id.source_type,
             "platform": self.session_id.platform,
             "customer_id": self.customer_id.id,
             "customer_name": self.customer_id.name,

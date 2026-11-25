@@ -11,49 +11,96 @@ class LivestreamConsole(models.AbstractModel):
     COMMENT_PAGE = 200
     BANK_PAGE = 50
 
+    MAX_OPEN_SESSIONS = 50
+
+    @api.model
+    def _session_info(self, session):
+        return {
+            "id": session.id,
+            "name": session.name,
+            "state": session.state,
+            "platform": session.platform,
+            "source_type": session.source_type,
+            "last_comment_at": fields.Datetime.to_string(session.last_comment_at),
+        }
+
+    @api.model
+    def _open_sessions(self):
+        return self.env["livestream.session"].search(
+            [("state", "=", "live")], order="last_comment_at desc nulls last, id desc", limit=self.MAX_OPEN_SESSIONS,
+        )
+
     @api.model
     def load(self, session_id):
+        """session_id: a session id, or "all"/False for every open source (live + posts)."""
         Session = self.env["livestream.session"]
-        session = Session.browse(session_id).exists() if session_id else Session
-        if not session:
-            session = Session.search([("state", "=", "live"), ("user_ids", "in", self.env.uid)], limit=1) \
-                or Session.search([("state", "=", "live")], limit=1) \
-                or Session.search([], limit=1)
-        sessions = Session.search([], limit=30)
+        open_sessions = self._open_sessions()
+        recent = Session.search([("state", "!=", "live")], limit=30)
         result = {
-            "sessions": [
-                {"id": s.id, "name": s.name, "state": s.state, "platform": s.platform} for s in sessions | session
-            ],
+            "sessions": [self._session_info(s) for s in open_sessions | recent],
             "session": False,
             "comments": [],
             "bank_transactions": [],
             "can_simulate": self._can_simulate(),
             "default_deposit": self.env["ir.config_parameter"].sudo().get_int("livestream_sale.default_deposit_amount"),
         }
-        if not session:
-            return result
-        result["session"] = {
-            "id": session.id,
-            "name": session.name,
-            "state": session.state,
-            "platform": session.platform,
-            "account_id": session.account_id.id,
-            "tags": [{
-                "code": t.code, "product_id": t.product_id.id,
-                "product_name": t.product_id.display_name, "price_unit": t.price_unit,
-            } for t in session.tag_ids],
-        }
+        if not session_id or session_id == "all":
+            sessions = open_sessions
+            result["session"] = {
+                "id": "all",
+                "name": self.env._("All open sources"),
+                "state": "live",
+                "platform": False,
+                "source_type": False,
+                "account_ids": sessions.account_id.ids,
+                "account_id": False,
+                "tags": [],
+            }
+        else:
+            sessions = Session.browse(int(session_id)).exists()
+            if not sessions:
+                return result
+            result["session"] = {
+                **self._session_info(sessions),
+                "account_id": sessions.account_id.id,
+                "account_ids": sessions.account_id.ids,
+                "permalink_url": sessions.permalink_url or False,
+                "tags": self._tags(sessions),
+            }
+            if sessions not in open_sessions | recent:
+                result["sessions"].append(self._session_info(sessions))
         comments = self.env["livestream.comment"].search(
-            [("session_id", "=", session.id)], limit=self.COMMENT_PAGE,
+            [("session_id", "in", sessions.ids)], order="id desc", limit=self.COMMENT_PAGE,
         )
         result["comments"] = [c._console_format() for c in comments]
-        provider = session.account_id.sudo().payment_provider_id
-        if provider:
+        providers = sessions.account_id.sudo().payment_provider_id
+        if providers:
             txs = self.env["livestream.bank.transaction"].search(
-                [("provider_id", "=", provider.id)], limit=self.BANK_PAGE,
+                [("provider_id", "in", providers.ids)], limit=self.BANK_PAGE,
             )
             result["bank_transactions"] = [t._console_format() for t in txs]
         return result
+
+    @api.model
+    def _tags(self, session):
+        return [{
+            "code": t.code, "product_id": t.product_id.id,
+            "product_name": t.product_id.display_name, "price_unit": t.price_unit,
+        } for t in session.tag_ids]
+
+    @api.model
+    def search_products(self, query, limit=20):
+        query = (query or "").strip()
+        if len(query) < 2:
+            return []
+        products = self.env["product.product"].search([
+            ("sale_ok", "=", True),
+            ("company_id", "in", [False, self.env.company.id]),
+            "|", "|", ("name", "ilike", query), ("default_code", "ilike", query), ("barcode", "=", query),
+        ], limit=limit)
+        return [{
+            "product_id": p.id, "product_name": p.display_name, "price_unit": p.lst_price,
+        } for p in products]
 
     @api.model
     def _can_simulate(self):
@@ -64,7 +111,8 @@ class LivestreamConsole(models.AbstractModel):
 
     @api.model
     def load_more_comments(self, session_id, before_id, tag_code=False):
-        domain = [("session_id", "=", session_id), ("id", "<", before_id)]
+        session_ids = self._open_sessions().ids if session_id == "all" else [int(session_id)]
+        domain = [("session_id", "in", session_ids), ("id", "<", before_id)]
         if tag_code:
             domain.append(("tag_code", "=", tag_code))
         comments = self.env["livestream.comment"].search(domain, order="id desc", limit=self.COMMENT_PAGE)
@@ -90,6 +138,8 @@ class LivestreamConsole(models.AbstractModel):
         channel = comment.channel_id or customer.channel_id
         return {
             "comment": comment._console_format(),
+            "tags": self._tags(comment.session_id),
+            "permalink_url": comment.session_id.permalink_url or False,
             "channel": {
                 "id": channel.id,
                 "window_state": channel.livestream_window_state,

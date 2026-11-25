@@ -7,3 +7,4 @@ from . import test_bank_matching
 from . import test_simulator
 from . import test_console
 from . import test_review_fixes
+from . import test_post_sessions

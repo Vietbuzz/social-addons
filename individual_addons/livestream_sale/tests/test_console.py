@@ -23,9 +23,10 @@ class TestConsole(LivestreamCommon):
         self.assertEqual(data["comments"][0]["id"], self.comment.id)
         self.assertTrue(data["can_simulate"])
 
-    def test_console_load_defaults_to_live_session(self):
+    def test_console_load_defaults_to_all_open_sources(self):
         data = self.Console.load(False)
-        self.assertEqual(data["session"]["id"], self.session.id)
+        self.assertEqual(data["session"]["id"], "all")
+        self.assertIn(self.comment.id, [c["id"] for c in data["comments"]])
 
     def test_load_more_comments_filters_tag(self):
         other = self.env["livestream.comment"]._ingest(self.session, "c2", "u2", "B", "dep qua", fields.Datetime.now())

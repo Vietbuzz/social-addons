@@ -20,6 +20,11 @@ class LivestreamSession(models.Model):
     date_start = fields.Datetime("Start")
     date_end = fields.Datetime("End")
     tag_ids = fields.One2many("livestream.session.tag", "session_id", "Product Tags", copy=True)
+    source_type = fields.Selection(
+        [("live", "Live"), ("post", "Post")], string="Source", required=True, default="live", index=True,
+    )
+    permalink_url = fields.Char("Post Link")
+    last_comment_at = fields.Datetime("Last Comment", index=True, copy=False)
     user_ids = fields.Many2many("res.users", string="Assistants")
 
     def action_start(self):
@@ -27,6 +32,27 @@ class LivestreamSession(models.Model):
 
     def action_end(self):
         self.write({"state": "ended", "date_end": fields.Datetime.now()})
+
+    @api.model
+    def _get_or_create_post(self, account, external_post_id, name, permalink=None):
+        """A regular post is handled like a live: one session per post (ended posts are kept, not recreated)."""
+        session = self.search([
+            ("account_id", "=", account.id), ("source_type", "=", "post"), ("external_post_id", "=", external_post_id),
+        ], limit=1)
+        if session:
+            return session
+        name = (name or "").strip().replace("\n", " ")
+        if len(name) > 60:
+            name = name[:57].rstrip() + "..."
+        return self.create({
+            "name": name or self.env._("Post %s", fields.Datetime.now().strftime("%d/%m")),
+            "account_id": account.id,
+            "source_type": "post",
+            "external_post_id": external_post_id,
+            "permalink_url": permalink,
+            "state": "live",
+            "date_start": fields.Datetime.now(),
+        })
 
     def action_open_console(self):
         self.ensure_one()

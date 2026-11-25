@@ -7,7 +7,9 @@
             <list>
                 <field name="date_start"/>
                 <field name="name"/>
+                <field name="source_type" widget="badge"/>
                 <field name="account_id"/>
+                <field name="last_comment_at" optional="show"/>
                 <field name="state" widget="badge" decoration-success="state == 'live'" decoration-muted="state == 'ended'"/>
             </list>
         </field>
@@ -36,6 +38,8 @@
                         <group>
                             <field name="date_start"/>
                             <field name="date_end"/>
+                            <field name="source_type"/>
+                            <field name="permalink_url" widget="url"/>
                             <field name="external_video_id"/>
                             <field name="external_post_id"/>
                         </group>
