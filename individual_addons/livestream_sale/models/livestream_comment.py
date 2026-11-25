@@ -67,6 +67,7 @@ class LivestreamComment(models.Model):
             "id": self.id,
             "session_id": self.session_id.id,
             "session_name": self.session_id.name,
+            "account_id": self.session_id.account_id.id,
             "source_type": self.session_id.source_type,
             "platform": self.session_id.platform,
             "customer_id": self.customer_id.id,

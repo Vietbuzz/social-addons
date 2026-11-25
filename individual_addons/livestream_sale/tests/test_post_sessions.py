@@ -48,6 +48,7 @@ class TestPostSessions(LivestreamCommon):
         self.assertIn(self.ls_account.id, data["session"]["account_ids"])
         post_item = next(c for c in data["comments"] if c["id"] == c_post.id)
         self.assertEqual((post_item["source_type"], post_item["session_name"]), ("post", "Bài 3"))
+        self.assertEqual(post_item["account_id"], self.ls_account.id)
         self.assertTrue(all("source_type" in s for s in data["sessions"]))
 
     def test_load_default_is_all(self):

@@ -44,8 +44,8 @@ export class ConversationPanel extends Component {
     }
 
     get igLiveHint() {
-        const session = this.state.session;
-        return session?.platform === "instagram" && session.state === "live";
+        const comment = this.originComment;
+        return comment?.platform === "instagram" && comment.source_type === "live";
     }
 
     get windowClass() {

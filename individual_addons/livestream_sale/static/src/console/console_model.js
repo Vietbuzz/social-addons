@@ -41,6 +41,8 @@ export class ConsoleModel {
             thread: null, // mail.thread of the open conversation
             form: { lines: [], phone: "", name: "", street: "", deposit: 0 },
             highlight: {},
+            unseen: {}, // session id -> new comments while viewing another source
+            productResults: [],
             busy: false,
             mobileTab: "comments",
         });
@@ -50,7 +52,7 @@ export class ConsoleModel {
     // Loading
     // ------------------------------------------------------------------
     async load(sessionId) {
-        const data = await this.orm.call("livestream.console", "load", [sessionId || false]);
+        const data = await this.orm.call("livestream.console", "load", [sessionId || "all"]);
         Object.assign(this.state, {
             loaded: true,
             sessions: data.sessions,
@@ -63,7 +65,31 @@ export class ConsoleModel {
             activeCommentId: false,
             panel: null,
             thread: null,
+            productResults: [],
         });
+        if (data.session) {
+            delete this.state.unseen[data.session.id];
+        }
+    }
+
+    get isAll() {
+        return this.state.session?.id === "all";
+    }
+
+    _watchesAccount(accountId) {
+        return Boolean(this.state.session?.account_ids?.includes(accountId));
+    }
+
+    _rememberSession(item) {
+        if (!this.state.sessions.some((s) => s.id === item.session_id)) {
+            this.state.sessions.unshift({
+                id: item.session_id,
+                name: item.session_name,
+                state: "live",
+                platform: item.platform,
+                source_type: item.source_type,
+            });
+        }
     }
 
     async loadMoreComments() {
@@ -104,11 +130,19 @@ export class ConsoleModel {
     // ------------------------------------------------------------------
     onCommentNotification(payload) {
         const s = this.state;
-        if (!s.session || payload.account_id !== s.session.account_id) {
+        if (!s.session) {
             return;
         }
+        if (this.isAll && !s.session.account_ids.includes(payload.account_id)) {
+            s.session.account_ids.push(payload.account_id); // a new source of a newly active account
+        }
         for (const item of payload.items) {
-            if (item.session_id !== s.session.id) {
+            this._rememberSession(item);
+            if (!this.isAll && item.session_id !== s.session.id) {
+                const known = s.comments.some((c) => c.id === item.id);
+                if (!known) {
+                    s.unseen[item.session_id] = (s.unseen[item.session_id] || 0) + 1;
+                }
                 continue;
             }
             const idx = s.comments.findIndex((c) => c.id === item.id);
@@ -123,7 +157,7 @@ export class ConsoleModel {
 
     async onBankNotification(payload) {
         const s = this.state;
-        if (!s.session || payload.account_id !== s.session.account_id) {
+        if (!s.session || !this._watchesAccount(payload.account_id)) {
             return;
         }
         let refresh = false;
@@ -211,20 +245,37 @@ export class ConsoleModel {
     }
 
     addLineFromTag(code) {
-        const tag = this.state.session?.tags.find((t) => t.code === code);
-        if (!tag) {
-            return;
+        const tag = (this.state.panel?.tags || []).find((t) => t.code === code);
+        if (tag) {
+            this.addProduct(tag);
         }
-        const existing = this.state.form.lines.find((l) => l.product_id === tag.product_id);
+    }
+
+    addProduct(product) {
+        const existing = this.state.form.lines.find((l) => l.product_id === product.product_id);
         if (existing) {
             existing.quantity += 1;
         } else {
             this.state.form.lines.push({
-                product_id: tag.product_id,
-                product_name: tag.product_name,
+                product_id: product.product_id,
+                product_name: product.product_name,
                 quantity: 1,
-                price_unit: tag.price_unit,
+                price_unit: product.price_unit,
             });
+        }
+        this.state.productResults = [];
+    }
+
+    async searchProducts(query) {
+        const q = (query || "").trim();
+        this._productQuery = q;
+        if (q.length < 2) {
+            this.state.productResults = [];
+            return;
+        }
+        const results = await this.orm.call("livestream.console", "search_products", [q]);
+        if (this._productQuery === q) {
+            this.state.productResults = results;
         }
     }
 
@@ -295,7 +346,14 @@ export class ConsoleModel {
     // Simulator
     // ------------------------------------------------------------------
     async simulateComment() {
-        await this._run(() => this.orm.call("livestream.simulator", "simulate_comment", [this.state.session.id]));
+        const target = this.isAll
+            ? this.state.sessions.find((s) => s.state === "live")?.id
+            : this.state.session.id;
+        if (!target) {
+            this.notification.add(_t("No open source to simulate on."), { type: "warning" });
+            return;
+        }
+        await this._run(() => this.orm.call("livestream.simulator", "simulate_comment", [target]));
     }
 
     async simulateCustomerReply(text) {
@@ -309,9 +367,19 @@ export class ConsoleModel {
         });
     }
 
+    _accountOfPanel() {
+        const sessionId = this.state.panel.comment.session_id;
+        const comment = this.state.comments.find((c) => c.session_id === sessionId);
+        return comment?.account_id || this.state.session.account_ids[0];
+    }
+
     async simulateBank(amount, content) {
         await this._run(() =>
-            this.orm.call("livestream.simulator", "simulate_bank", [this.state.session.account_id, amount, content])
+            this.orm.call("livestream.simulator", "simulate_bank", [
+                this.state.panel?.comment ? this._accountOfPanel() : this.state.session.account_ids[0],
+                amount,
+                content,
+            ])
         );
     }
 }

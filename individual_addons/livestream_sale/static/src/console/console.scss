@@ -99,6 +99,21 @@
     }
 }
 
+.o_livestream_console {
+    .o_ls_src_post {
+        background-color: #0d9488;
+        color: #fff;
+    }
+    .o_ls_product_results {
+        z-index: 10;
+        max-height: 240px;
+        overflow-y: auto;
+    }
+    .o_ls_source_select {
+        max-width: 360px;
+    }
+}
+
 @keyframes o_ls_flash {
     from {
         background-color: rgba($warning, 0.45);

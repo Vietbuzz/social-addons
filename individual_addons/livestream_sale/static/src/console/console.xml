@@ -5,16 +5,31 @@
         <div class="o_livestream_console d-flex flex-column h-100 bg-view">
             <div class="o_ls_topbar d-flex flex-wrap align-items-center gap-2 px-3 py-2 border-bottom">
                 <t t-if="this.state.session">
-                    <select class="form-select form-select-sm w-auto" t-on-change="(ev) => this.onChangeSession(ev)">
-                        <t t-foreach="this.state.sessions" t-as="s" t-key="s.id">
-                            <option t-att-value="s.id" t-att-selected="s.id === this.state.session.id" t-out="'[' + this.platformInfo(s.platform).label + '] ' + s.name"/>
-                        </t>
+                    <select class="form-select form-select-sm w-auto o_ls_source_select" t-on-change="(ev) => this.onChangeSession(ev)">
+                        <option value="all" t-att-selected="this.model.isAll">★ All open sources</option>
+                        <optgroup t-if="this.liveSessions.length" label="Live">
+                            <t t-foreach="this.liveSessions" t-as="s" t-key="s.id">
+                                <option t-att-value="s.id" t-att-selected="s.id === this.state.session.id" t-out="this.sessionLabel(s)"/>
+                            </t>
+                        </optgroup>
+                        <optgroup t-if="this.postSessions.length" label="Posts">
+                            <t t-foreach="this.postSessions" t-as="s" t-key="s.id">
+                                <option t-att-value="s.id" t-att-selected="s.id === this.state.session.id" t-out="this.sessionLabel(s)"/>
+                            </t>
+                        </optgroup>
                     </select>
-                    <span class="badge o_ls_pf" t-att-class="this.platformInfo(this.state.session.platform).cls"
-                          t-out="this.platformInfo(this.state.session.platform).title"/>
-                    <span t-if="this.state.session.state === 'live'" class="badge text-bg-danger"><i class="fa fa-circle me-1"/>LIVE</span>
-                    <span t-else="" class="badge text-bg-secondary" t-out="this.state.session.state"/>
-                    <button class="btn btn-sm btn-link" t-on-click="() => this.openSession()" title="Session settings"><i class="fa fa-cog"/></button>
+                    <t t-if="this.model.isAll">
+                        <span class="badge text-bg-dark"><i class="fa fa-inbox me-1"/>All sources</span>
+                    </t>
+                    <t t-else="">
+                        <span class="badge o_ls_pf" t-att-class="this.platformInfo(this.state.session.platform).cls"
+                              t-out="this.platformInfo(this.state.session.platform).title"/>
+                        <span t-if="this.state.session.source_type === 'post'" class="badge o_ls_src_post">POST</span>
+                        <span t-if="this.state.session.state === 'live'" class="badge text-bg-danger"><i class="fa fa-circle me-1"/><t t-out="this.state.session.source_type === 'post' ? 'OPEN' : 'LIVE'"/></span>
+                        <span t-else="" class="badge text-bg-secondary" t-out="this.state.session.state"/>
+                        <a t-if="this.state.session.permalink_url" t-att-href="this.state.session.permalink_url" target="_blank" class="btn btn-sm btn-link"><i class="fa fa-external-link me-1"/>Open post</a>
+                        <button class="btn btn-sm btn-link" t-on-click="() => this.openSession()" title="Session settings"><i class="fa fa-cog"/></button>
+                    </t>
                 </t>
                 <div class="ms-auto d-flex gap-2 d-lg-none">
                     <t t-foreach="[['comments', 'Comments'], ['chat', 'Chat'], ['order', 'Order']]" t-as="tab" t-key="tab[0]">
@@ -75,10 +90,12 @@
                         <div class="flex-grow-1 min-w-0">
                             <div class="d-flex align-items-center gap-1">
                                 <span class="badge o_ls_pf" t-att-class="this.platformInfo(c.platform).cls" t-out="this.platformInfo(c.platform).label"/>
+                                <span class="badge" t-att-class="c.source_type === 'post' ? 'o_ls_src_post' : 'text-bg-danger'" t-out="c.source_type === 'post' ? 'POST' : 'LIVE'"/>
                                 <strong class="text-truncate" t-out="c.customer_name"/>
                                 <span t-if="c.tag_code" class="badge text-bg-info"><t t-out="c.tag_code"/><t t-if="c.quantity > 1"> ×<t t-out="c.quantity"/></t></span>
                                 <span class="ms-auto small text-muted" t-out="this.time(c.comment_time)"/>
                             </div>
+                            <div t-if="this.model.isAll" class="small text-muted text-truncate"><i class="fa fa-angle-right me-1"/><t t-out="c.session_name"/></div>
                             <div class="small text-break" t-out="c.message"/>
                             <div class="d-flex align-items-center gap-2 mt-1">
                                 <span class="badge" t-att-class="this.stateBadge(c.state)" t-out="c.state"/>
@@ -111,6 +128,10 @@
                     </div>
                     <div class="o_ls_origin mt-1 p-2 rounded border bg-view small">
                         <i class="fa fa-comment-o me-1"/> Comment: <em t-out="this.originComment.message"/>
+                        <div class="text-muted mt-1">
+                            <t t-out="this.originComment.source_type === 'post' ? 'Post' : 'Live'"/>: <t t-out="this.originComment.session_name"/>
+                            <a t-if="this.state.panel.permalink_url" t-att-href="this.state.panel.permalink_url" target="_blank" class="ms-2"><i class="fa fa-external-link me-1"/>Open post</a>
+                        </div>
                     </div>
                 </div>
                 <div class="o_ls_thread flex-grow-1 d-flex flex-column min-h-0">
@@ -160,9 +181,21 @@
                         </t>
                     </tbody>
                 </table>
-                <select class="form-select form-select-sm mb-2" t-on-change="(ev) => this.onAddTag(ev)">
+                <div class="o_ls_product_search position-relative mb-2">
+                    <input class="form-control form-control-sm" placeholder="+ Search any product (name / code)…"
+                           t-on-input="(ev) => this.onSearchProduct(ev)"/>
+                    <div t-if="this.state.productResults.length" class="list-group position-absolute w-100 shadow o_ls_product_results">
+                        <t t-foreach="this.state.productResults" t-as="p" t-key="p.product_id">
+                            <button class="list-group-item list-group-item-action py-1 small d-flex" t-on-click="(ev) => this.pickProduct(p, ev)">
+                                <span class="text-truncate" t-out="p.product_name"/>
+                                <span class="ms-auto text-muted" t-out="this.formatVnd(p.price_unit)"/>
+                            </button>
+                        </t>
+                    </div>
+                </div>
+                <select t-if="this.state.panel.tags.length" class="form-select form-select-sm mb-2" t-on-change="(ev) => this.onAddTag(ev)">
                     <option value="">+ Add product by tag…</option>
-                    <t t-foreach="this.state.session.tags" t-as="tag" t-key="tag.code">
+                    <t t-foreach="this.state.panel.tags" t-as="tag" t-key="tag.code">
                         <option t-att-value="tag.code"><t t-out="tag.code"/> — <t t-out="tag.product_name"/></option>
                     </t>
                 </select>

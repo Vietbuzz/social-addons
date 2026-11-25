@@ -33,7 +33,7 @@ export class LivestreamConsole extends Component {
         });
         const params = this.props.action.params || {};
         const context = this.props.action.context || {};
-        onWillStart(() => this.model.load(params.session_id || context.active_id || false));
+        onWillStart(() => this.model.load(params.session_id || "all"));
     }
 
     get state() {
@@ -41,7 +41,22 @@ export class LivestreamConsole extends Component {
     }
 
     onChangeSession(ev) {
-        this.model.load(parseInt(ev.target.value));
+        const value = ev.target.value;
+        this.model.load(value === "all" ? "all" : parseInt(value));
+    }
+
+    get liveSessions() {
+        return this.state.sessions.filter((s) => s.source_type !== "post");
+    }
+
+    get postSessions() {
+        return this.state.sessions.filter((s) => s.source_type === "post");
+    }
+
+    sessionLabel(s) {
+        const unseen = this.state.unseen[s.id];
+        const closed = s.state === "live" ? "" : " ✓";
+        return `[${this.platformInfo(s.platform).label}] ${s.name}${closed}${unseen ? ` (+${unseen})` : ""}`;
     }
 
     openSession() {

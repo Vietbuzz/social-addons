@@ -28,6 +28,18 @@ export class OrderPanel extends Component {
         line[name] = Number(ev.target.value);
     }
 
+    onSearchProduct(ev) {
+        this.model.searchProducts(ev.target.value);
+    }
+
+    pickProduct(product, ev) {
+        this.model.addProduct(product);
+        const input = ev.target.closest(".o_ls_product_search")?.querySelector("input");
+        if (input) {
+            input.value = "";
+        }
+    }
+
     onAddTag(ev) {
         if (ev.target.value) {
             this.model.addLineFromTag(ev.target.value);
