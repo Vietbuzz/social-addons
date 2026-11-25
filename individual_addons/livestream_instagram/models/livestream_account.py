@@ -24,7 +24,7 @@ class LivestreamAccount(models.Model):
     def _livestream_private_reply(self, comment, body, attachments):
         if self.platform != "instagram":
             return super()._livestream_private_reply(comment, body, attachments)
-        if comment.session_id.state != "live":
+        if comment.session_id.source_type == "live" and comment.session_id.state != "live":
             raise UserError(self.env._(
                 "Instagram only allows private replies during the live broadcast; this live has ended.",
             ))

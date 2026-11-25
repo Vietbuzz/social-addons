@@ -24,6 +24,8 @@ class LivestreamWebhookEvent(models.Model):
             value = change.get("value") or {}
             if change.get("field") == "live_comments":
                 self._ig_live_comment(account, value, entry.get("time"))
+            elif change.get("field") == "comments":
+                self._ig_post_comment(account, value, entry.get("time"))
             elif change.get("field") == "messages":
                 self._ig_event(account, value)
         for event in entry.get("messaging", []):
@@ -39,6 +41,22 @@ class LivestreamWebhookEvent(models.Model):
         session = self.env["livestream.session"].sudo()._ig_upsert_live(account, media_id, True)
         if session.state != "live":
             return  # late event for an ended live
+        self.env["livestream.comment"].sudo()._ingest(
+            session, value["comment_id"], author.get("id") or f"anon:{value['comment_id']}",
+            author.get("username") or "Instagram user", value.get("text", ""),
+            graph_api.parse_time(time),
+        )
+
+    def _ig_post_comment(self, account, value, time):
+        media = value.get("media") or {}
+        if (media.get("media_product_type") or "").upper() == "LIVE":
+            return self._ig_live_comment(account, value, time)
+        author = value.get("from") or {}
+        if not value.get("comment_id") or not media.get("id") or author.get("id") == account.external_id:
+            return
+        session = self.env["livestream.session"].sudo()._ig_post_session(account, media["id"])
+        if session.state != "live":
+            return  # the shop closed this post
         self.env["livestream.comment"].sudo()._ingest(
             session, value["comment_id"], author.get("id") or f"anon:{value['comment_id']}",
             author.get("username") or "Instagram user", value.get("text", ""),

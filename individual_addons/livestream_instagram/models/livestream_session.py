@@ -16,6 +16,20 @@ class LivestreamSession(models.Model):
     ig_missed_polls = fields.Integer(copy=False, default=0)
 
     @api.model
+    def _ig_post_session(self, account, media_id):
+        existing = self.search([
+            ("account_id", "=", account.id), ("source_type", "=", "post"), ("external_post_id", "=", media_id),
+        ], limit=1)
+        if existing:
+            return existing
+        try:
+            info = graph_api._request("GET", media_id, account._fb_token(), params={"fields": "caption,permalink"})
+        except Exception as e:  # noqa: BLE001 - never lose the comment because the media can't be read
+            _logger.info("Cannot read Instagram media %s: %s", media_id, e)
+            info = {}
+        return self._get_or_create_post(account, media_id, info.get("caption"), info.get("permalink"))
+
+    @api.model
     def _ig_upsert_live(self, account, media_id, live):
         """Instagram live media <-> session. draft -> live allowed; an ended live never reopens."""
         session = self.search([("account_id", "=", account.id), ("external_video_id", "=", media_id)], limit=1)
@@ -56,7 +70,8 @@ class LivestreamSession(models.Model):
             return
         live_ids = [m["id"] for m in res.get("data", [])]
         running = self.sudo().search([
-            ("account_id", "=", account.id), ("state", "=", "live"), ("external_video_id", "not in", live_ids),
+            ("account_id", "=", account.id), ("source_type", "=", "live"), ("state", "=", "live"),
+            ("external_video_id", "not in", live_ids),
         ])
         for session in running:
             session.ig_missed_polls += 1
