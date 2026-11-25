@@ -46,7 +46,7 @@ class TestTokenHealth(FacebookCommon):
         self.fb.token_state = "valid"
         self._check(side_effect=requests.ConnectionError("dns"))
         self.assertEqual(self.fb.token_state, "valid")
-        self.assertIn("dns", self.fb.token_error)
+        self.assertIn("ConnectionError", self.fb.token_error)  # type only: messages may embed secret URLs
 
     def test_health_without_app_credentials_uses_me(self):
         self.fb.sudo().fb_app_secret = False

@@ -33,5 +33,8 @@ class MetaOAuthController(http.Controller):
         except UserError as e:
             _logger.warning("Meta OAuth exchange failed: %s", e)
             return request.make_response(f"Facebook connection failed: {escape(str(e))}", status=400)
+        except Exception as e:  # noqa: BLE001 - never let a traceback (URL with secrets) reach logs/user
+            _logger.warning("Meta OAuth exchange failed unexpectedly: %s", type(e).__name__)
+            return request.make_response("Facebook connection failed. Please try again.", status=400)
         wizard = env["livestream.meta.connect.wizard"]._create_from_pages(account, user_token, pages)
         return request.redirect(f"/odoo/action-livestream_facebook.action_meta_connect_wizard/{wizard.id}")

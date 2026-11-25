@@ -12,7 +12,8 @@
                 <field name="source_account_id" invisible="1"/>
                 <field name="line_ids">
                     <list editable="bottom" create="0" delete="0">
-                        <field name="selected"/>
+                        <field name="connectable" column_invisible="1"/>
+                        <field name="selected" readonly="not connectable"/>
                         <field name="name"/>
                         <field name="page_id"/>
                         <field name="ig_username"/>

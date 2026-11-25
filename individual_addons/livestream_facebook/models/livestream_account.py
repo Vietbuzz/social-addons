@@ -60,7 +60,7 @@ class LivestreamAccount(models.Model):
     # Token health
     # ------------------------------------------------------------------
     def _check_token_health(self):
-        for account in self.sudo():
+        for account in self.sudo().filtered(lambda a: a.platform in ("facebook", "instagram")):
             token = account.access_token
             if not token:
                 continue
@@ -84,10 +84,15 @@ class LivestreamAccount(models.Model):
                     vals.update(token_state="invalid", token_error=str(e)[:250])
                 else:
                     vals["token_error"] = str(e)[:250]
-            except Exception as e:  # noqa: BLE001 - network trouble is not a broken token
-                _logger.warning("Token check failed for account %s: %s", account.id, e)
-                vals["token_error"] = str(e)[:250]
-            account.write(vals)
+            except Exception as e:  # noqa: BLE001 - unexpected trouble is not a broken token
+                # only the exception type: messages of HTTP libraries may embed URLs with secrets
+                _logger.warning("Token check failed for account %s: %s", account.id, type(e).__name__)
+                vals["token_error"] = f"Check failed ({type(e).__name__})"
+            try:
+                with self.env.cr.savepoint():
+                    account.write(vals)
+            except Exception as e:  # noqa: BLE001 - one account must not roll back the others
+                _logger.warning("Cannot store token state of account %s: %s", account.id, type(e).__name__)
 
     @api.model
     def _cron_check_tokens(self):

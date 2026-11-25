@@ -33,6 +33,11 @@ class LivestreamAccount(models.Model):
         "UNIQUE(platform, external_id)", "This account is already connected.",
     )
 
+    def write(self, vals):
+        if "access_token" in vals and "token_state" not in vals:
+            vals = {**vals, "token_state": "unknown", "token_error": False}
+        return super().write(vals)
+
     def _notify_console(self, notification_type, payload):
         """Push items to every open operator console (clients filter on account_id)."""
         self.ensure_one()

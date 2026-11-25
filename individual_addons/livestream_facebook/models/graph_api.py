@@ -21,9 +21,13 @@ class MetaApiError(UserError):
 
 def _request(method, path, token, params=None, json=None, data=None, files=None):
     params = dict(params or {}, access_token=token)
-    response = requests.request(
-        method, f"{GRAPH_URL}/{path}", params=params, json=json, data=data, files=files, timeout=TIMEOUT,
-    )
+    try:
+        response = requests.request(
+            method, f"{GRAPH_URL}/{path}", params=params, json=json, data=data, files=files, timeout=TIMEOUT,
+        )
+    except requests.RequestException as e:
+        # never propagate the exception text: it contains the full URL with tokens/secrets
+        raise MetaApiError(f"Facebook: network error ({type(e).__name__}) contacting graph.facebook.com") from None
     try:
         body = response.json()
     except ValueError:

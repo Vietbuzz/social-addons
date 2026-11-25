@@ -71,7 +71,6 @@ export class ConsoleModel {
             panel: null,
             thread: null,
             productResults: [],
-            tokenAlerts: [],
         });
         if (data.session?.id === "all") {
             this.state.unseen = {};
